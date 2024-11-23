@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android) version "1.9.10"
+    alias(libs.plugins.jetbrains.kotlin.android)
 }
 
 android {
@@ -41,7 +41,7 @@ android {
         viewBinding = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.3"
+        kotlinCompilerExtensionVersion = "1.5.1"
     }
     packaging {
         resources {

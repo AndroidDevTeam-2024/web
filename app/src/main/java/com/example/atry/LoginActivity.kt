@@ -110,7 +110,9 @@ class LoginActivity: ComponentActivity() {
                 }
             }
             Button(
-                onClick = { /* Perform signup logic */ },
+                onClick = {
+                    navigateToSignScreen()
+                          },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Signup")
@@ -141,10 +143,12 @@ class LoginActivity: ComponentActivity() {
     }
 
     private fun navigateToHomeScreen() {
-        val intent = Intent(this, MainActivity::class.java)
-        this.startActivity(intent)
         // 如果希望登录界面不再保留
         (this as? Activity)?.finish()
     }
-
+    private fun navigateToSignScreen() {
+        val intent = Intent(this, SignupActivity::class.java)
+        this.startActivity(intent)
+        // 如果希望登录界面不再保留
+    }
 }
