@@ -1,6 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android) version "1.9.10"
+    alias(libs.plugins.jetbrains.kotlin.android)
 }
 
 android {
@@ -41,7 +41,7 @@ android {
         viewBinding = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.3"
+        kotlinCompilerExtensionVersion = "1.5.1"
     }
     packaging {
         resources {
@@ -59,8 +59,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:2.9.0") // Gson 转换器
     implementation("com.squareup.okhttp3:okhttp:4.9.3") // OkHttp 网络库
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.3") // OkHttp 日志拦截器
-    implementation ("androidx.compose.material3:material3:1.2.0") // 或者最新版本
-    implementation ("androidx.compose.material:material-icons-extended:1.6.0") // 或者最新版本
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

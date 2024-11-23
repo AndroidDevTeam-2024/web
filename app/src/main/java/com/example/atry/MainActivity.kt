@@ -1,129 +1,123 @@
 package com.example.atry
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.automirrored.filled.Message
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.material3.Surface
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val intent = Intent(this, AccountActivity::class.java)
+        startActivity(intent)
         setContent {
-            MainScreen()
-        }
-    }
-}
 
-@Composable
-fun MainScreen() {
-    // Bottom navigation items
-    val navItems = listOf(
-        NavigationItem("Home", Icons.Filled.Home),
-        NavigationItem("Products", Icons.Filled.ShoppingCart),
-        NavigationItem("Messages", Icons.AutoMirrored.Filled.Message),
-        NavigationItem("Profile", Icons.Filled.Person)
-    )
-
-    // Navigation state to track selected item
-    var selectedItem by remember { mutableStateOf(0) }
-
-    Scaffold(
-        bottomBar = {
-            BottomNavigationBar(
-                items = navItems,
-                selectedItem = selectedItem,
-                onItemSelected = { selectedItem = it }
-            )
-        }
-    ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
-            // Display the selected screen
-            when (selectedItem) {
-                0 -> HomeScreen()
-                1 -> ProductsScreen()
-                2 -> MessagesScreen()
-                3 -> ProfileScreen()
+            MaterialTheme {
+                Conversation(SampleData.conversationSample)
             }
         }
     }
-}
 
-@Composable
-fun BottomNavigationBar(
-    items: List<NavigationItem>,
-    selectedItem: Int,
-    onItemSelected: (Int) -> Unit
-) {
-    NavigationBar {
-        items.forEachIndexed { index, item ->
-            NavigationBarItem(
-                icon = { Icon(item.icon, contentDescription = item.label) },
-                label = { Text(item.label) },
-                selected = selectedItem == index,
-                onClick = { onItemSelected(index) }
-            )
+    data class Message(val author: String, val body: String)
+
+    @Composable
+    fun Conversation(messages: List<Message>) {
+        LazyColumn {
+            items(messages) { message ->
+                MessageCard(message)
+            }
         }
     }
-}
 
-data class NavigationItem(val label: String, val icon: ImageVector)
+    @Composable
+    fun MessageCard(msg: Message) {
+        Row(modifier = Modifier.padding(all = 8.dp)) {
+            Image(
+                painter = painterResource(R.drawable.profile_test),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .border(1.5.dp, MaterialTheme.colorScheme.primary, CircleShape)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
 
-// Screens for each navigation item
-@Composable
-fun HomeScreen() {
-    CenteredContent("Home Screen")
-}
+            // We keep track if the message is expanded or not in this
+            // variable
+            var isExpanded by remember { mutableStateOf(false) }
 
-@Composable
-fun ProductsScreen() {
-    CenteredContent("Products Screen")
-}
+            // We toggle the isExpanded variable when we click on this Column
+            Column(modifier = Modifier.clickable { isExpanded = !isExpanded }) {
+                Text(
+                    text = msg.author,
+                    color = MaterialTheme.colorScheme.secondary,
+                    style = MaterialTheme.typography.titleSmall
+                )
 
-@Composable
-fun MessagesScreen() {
-    CenteredContent("Messages Screen")
-}
+                Spacer(modifier = Modifier.height(4.dp))
 
-@Composable
-fun ProfileScreen() {
-    CenteredContent("Profile Screen")
-}
+                Surface(
+                    shape = MaterialTheme.shapes.medium,
+                    shadowElevation = 1.dp,
+                ) {
+                    Text(
+                        text = msg.body,
+                        modifier = Modifier.padding(all = 4.dp),
+                        // If the message is expanded, we display all its content
+                        // otherwise we only display the first line
+                        maxLines = if (isExpanded) Int.MAX_VALUE else 1,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        }
+    }
 
-// Utility Composable to display centered text
-@Composable
-fun CenteredContent(text: String) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.headlineMedium,
-            textAlign = TextAlign.Center
+
+    object SampleData {
+        val conversationSample = listOf(
+            Message("Alice", "Hi, how are you?"),
+            Message("Bob", "I'm good, thanks! How about you?"),
+            Message("Alice", "Pretty good, just working on a project."),
+            Message("Bob", "That sounds great. Let me know if you need any help!"),
+            Message("Alice", "Sure, thanks!"),
+        )
+    }
+
+    @Preview
+    @Composable
+    fun PreviewMessageCard() {
+        MessageCard(
+            msg = Message("Lexi", "Hey, take a look at Jetpack Compose, it's great!")
         )
     }
 }
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewMainScreen() {
-    MainScreen()
-}
-
 
