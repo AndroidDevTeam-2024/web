@@ -1,11 +1,11 @@
 package com.example.atry
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -17,11 +17,16 @@ import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.runtime.Composable
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.*
 
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        val intent = Intent(this, LoginActivity::class.java)
+        this.startActivity(intent)
         setContent {
             MainScreen()
         }
@@ -30,66 +35,56 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainScreen() {
-    // Bottom navigation items
-    val navItems = listOf(
-        NavigationItem("Home", Icons.Filled.Home),
-        NavigationItem("Products", Icons.Filled.ShoppingCart),
-        NavigationItem("Messages", Icons.AutoMirrored.Filled.Message),
-        NavigationItem("Profile", Icons.Filled.Person)
-    )
-
-    // Navigation state to track selected item
-    var selectedItem by remember { mutableStateOf(0) }
+    val navController = rememberNavController()
 
     Scaffold(
-        bottomBar = {
-            BottomNavigationBar(
-                items = navItems,
-                selectedItem = selectedItem,
-                onItemSelected = { selectedItem = it }
-            )
-        }
-    ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
-            // Display the selected screen
-            when (selectedItem) {
-                0 -> HomeScreen()
-                1 -> ProductsScreen()
-                2 -> MessagesScreen()
-                3 -> ProfileScreen()
-            }
+        bottomBar = { BottomNavigationBar(navController) }
+    ) { innerPadding ->
+        NavHost(
+            navController = navController,
+            startDestination = "home",
+            modifier = Modifier.padding(innerPadding)
+        ) {
+            composable("home") { HomeScreen() }
+            composable("products") { GoodsActivity().GoodsScreen() }
+            composable("messages") { MessagesScreen() }
+            composable("profile") { ProfileScreen() }
         }
     }
 }
 
 @Composable
-fun BottomNavigationBar(
-    items: List<NavigationItem>,
-    selectedItem: Int,
-    onItemSelected: (Int) -> Unit
-) {
+fun BottomNavigationBar(navController: NavHostController) {
+    val items = listOf(
+        NavigationItem("home", "Home", Icons.Filled.Home),
+        NavigationItem("products", "Products", Icons.Filled.ShoppingCart),
+        NavigationItem("messages", "Messages", Icons.AutoMirrored.Filled.Message),
+        NavigationItem("profile", "Profile", Icons.Filled.Person)
+    )
     NavigationBar {
-        items.forEachIndexed { index, item ->
+        val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+        items.forEach { item ->
             NavigationBarItem(
                 icon = { Icon(item.icon, contentDescription = item.label) },
                 label = { Text(item.label) },
-                selected = selectedItem == index,
-                onClick = { onItemSelected(index) }
+                selected = currentRoute == item.route,
+                onClick = {
+                    navController.navigate(item.route) {
+                        launchSingleTop = true
+                        restoreState = true
+                        popUpTo(navController.graph.startDestinationId) { saveState = true }
+                    }
+                }
             )
         }
     }
 }
 
-data class NavigationItem(val label: String, val icon: ImageVector)
+data class NavigationItem(val route: String, val label: String, val icon: ImageVector)
 
 // Screens for each navigation item
 @Composable
 fun HomeScreen() {
-    CenteredContent("Home Screen")
-}
-
-@Composable
-fun ProductsScreen() {
     CenteredContent("Products Screen")
 }
 

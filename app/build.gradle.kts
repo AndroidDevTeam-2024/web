@@ -61,6 +61,8 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.9.3") // OkHttp 日志拦截器
     implementation ("androidx.compose.material3:material3:1.2.0") // 或者最新版本
     implementation ("androidx.compose.material:material-icons-extended:1.6.0") // 或者最新版本
+    implementation ("androidx.navigation:navigation-compose:2.7.3") // 最新版本，检查是否有更新
+    implementation ("io.coil-kt:coil-compose:2.4.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
