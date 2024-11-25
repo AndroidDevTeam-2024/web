@@ -8,7 +8,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 object NetworkManager {
 
     // 定义后端 API 的基础 URL
-    private const val BASE_URL = "http://10.0.2.2:4523/m1/5507544-5183784-default/"
+    private const val BASE_URL = "http://47.93.172.156:8080"
 
     // 创建日志拦截器
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
@@ -29,7 +29,7 @@ object NetworkManager {
     }
 
     data class LoginRequest(
-        val username: String,
+        val name: String,
         val password: String
     )
 
@@ -38,8 +38,9 @@ object NetworkManager {
     )
 
     data class SignupRequest(
-        val username: String,
-        val password: String
+        val name: String,
+        val password: String,
+        val email: String
     )
 
     data class SignupResponse(

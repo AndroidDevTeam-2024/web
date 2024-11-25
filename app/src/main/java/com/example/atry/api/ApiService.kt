@@ -32,7 +32,7 @@ interface ApiService {
     suspend fun detailGoods(@Path("commodity_id") commodityId: Int): Response<NetworkManager.ProductDetail>
 }
 interface AuthService {
-    @POST("localhost/login") // 登录接口的路径，具体根据你的后端 API 修改
+    @POST("user/login") // 登录接口的路径，具体根据你的后端 API 修改
     suspend fun login(@Body request: NetworkManager.LoginRequest): Response<NetworkManager.LoginResponse>
     @POST("user/register")
     suspend fun signup(@Body request: NetworkManager.SignupRequest): Response<NetworkManager.SignupResponse>

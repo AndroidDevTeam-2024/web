@@ -125,7 +125,7 @@ fun SignupScreen() {
                                 // 调用注册接口
                                 val response = withContext(Dispatchers.IO) {
                                     NetworkManager.authService.signup(
-                                        NetworkManager.SignupRequest(username, password)
+                                        NetworkManager.SignupRequest(username, password, "123456@qq.com")
                                     )
                                 }
                                 Log.d("NetworkRequest", "Request was sent successfully")
