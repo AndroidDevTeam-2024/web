@@ -26,6 +26,11 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.atry.iomanager.AvatarManager.uploadAvatarWithUserId
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class RegisterCommodityActivity : ComponentActivity() {
 
@@ -201,7 +206,23 @@ class RegisterCommodityActivity : ComponentActivity() {
 
                 // 提交按钮
                 Button(
-                    onClick = { /* 提交逻辑 */ },
+                    onClick = {
+                        CoroutineScope(Dispatchers.Main).launch {
+                            try {
+                                val bitmap = loadBitmapFromUri(selectedImageUri!!)
+                                // 使用后台线程执行耗时操作
+                                val response = withContext(Dispatchers.IO) {
+                                    if (bitmap != null) {
+                                        uploadAvatarWithUserId("1", bitmap, "image")
+                                    }
+                                }
+
+                            } catch (e: Exception) {
+                                // 处理异常
+                                e.printStackTrace()
+                            }
+                        }
+                              },
                     modifier = Modifier.weight(1f)
                 ) {
                     Text("Submit")

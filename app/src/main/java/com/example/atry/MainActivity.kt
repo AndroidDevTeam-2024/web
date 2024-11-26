@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -27,7 +28,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import kotlinx.coroutines.delay
@@ -233,28 +237,51 @@ fun SwipeToDismissMessage(
 @Composable
 fun MessageItem(
     message: Message,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = Modifier
+    Row(
+        modifier = modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(16.dp)
+            .padding(12.dp)
     ) {
-        Text(
-            text = message.senderName,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold
+        // 头像
+        Image(
+            painter = painterResource(id = R.drawable.profile_test),
+            contentDescription = "Sender Avatar",
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary)
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        Log.d("MessageContent", message.content)
-        Text(
-            text = message.content,
-            style = MaterialTheme.typography.bodyMedium,
-        )
-        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        // 消息内容部分
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(12.dp)
+        ) {
+            Text(
+                text = message.senderName,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = message.content,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
 }
+
 
 // 消息数据类
 @Composable

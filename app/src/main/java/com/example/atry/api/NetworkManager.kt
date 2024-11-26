@@ -34,7 +34,9 @@ object NetworkManager {
     )
 
     data class LoginResponse(
-        val token: String
+        val id : Int,
+        val email: String,
+        val avator: String
     )
 
     data class SignupRequest(

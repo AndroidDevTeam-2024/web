@@ -77,7 +77,7 @@ object AvatarManager {
         val requestBody = avatarBytes.toRequestBody("image/png".toMediaTypeOrNull(), 0)
 
         // 创建 MultipartBody.Part
-        return MultipartBody.Part.createFormData("avatar", filename, requestBody)
+        return MultipartBody.Part.createFormData("avator", filename, requestBody)
     }
 
     private fun createUserIdRequestBody(userId: String): RequestBody {

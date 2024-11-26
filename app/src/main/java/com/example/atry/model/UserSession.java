@@ -2,10 +2,11 @@ package com.example.atry.model;
 
 public class UserSession {
     private static UserSession instance;
-    private String id;
+    private Integer id;
     private String username;
     private String email;
     private String token;
+    private String avatar;
 
     private UserSession() {}
 
@@ -16,7 +17,8 @@ public class UserSession {
         return instance;
     }
 
-    public String getId() {
+
+    public Integer getId() {
         return id;
     }
     // Getters and Setters
@@ -44,7 +46,14 @@ public class UserSession {
         this.token = token;
     }
 
-    public void setId(String id) {
+    public void setId(Integer id) {
         this.id = id;
+    }
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    public String getAvatar() {
+        return avatar;
     }
 }

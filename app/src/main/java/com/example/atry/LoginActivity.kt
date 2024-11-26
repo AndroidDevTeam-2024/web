@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import coil.compose.AsyncImage
 import com.example.atry.api.NetworkManager
+import com.example.atry.model.UserSession
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -93,7 +94,7 @@ class LoginActivity: ComponentActivity() {
                             if (response.isSuccessful) {
                                 val loginResponse = response.body()
                                 if (loginResponse != null) {
-                                    onLoginSuccess(loginResponse.token)
+                                    onLoginSuccess(loginResponse)
                                 } else {
                                     errorMessage = "Unexpected response from server"
                                 }
@@ -131,11 +132,11 @@ class LoginActivity: ComponentActivity() {
 
         }
 
-    private fun onLoginSuccess(token: String) {
+    private fun onLoginSuccess(loginResponse: NetworkManager.LoginResponse) {
 
         // 保存用户 Token
-        saveToken(token)
-
+        saveToken(loginResponse)
+        println("12233")
         // 显示登录成功提示
         showSuccessMessage()
 
@@ -143,9 +144,11 @@ class LoginActivity: ComponentActivity() {
         navigateToHomeScreen()
     }
 
-    private fun saveToken(token: String) {
-        val sharedPreferences = this.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE)
-        sharedPreferences.edit().putString("auth_token", token).apply()
+    private fun saveToken(loginResponse: NetworkManager.LoginResponse) {
+        val userSession = UserSession.getInstance()
+        userSession.id = loginResponse.id
+        userSession.email = loginResponse.email
+        userSession.avatar = loginResponse.avator
     }
 
     private fun showSuccessMessage() {
@@ -160,5 +163,9 @@ class LoginActivity: ComponentActivity() {
         val intent = Intent(this, SignupActivity::class.java)
         this.startActivity(intent)
         // 如果希望登录界面不再保留
+    }
+
+    override fun onBackPressed() {
+        finishAffinity()
     }
 }

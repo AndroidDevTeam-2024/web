@@ -19,14 +19,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.sp
 import com.example.atry.api.NetworkManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.regex.Pattern
 
 
 class SignupActivity : ComponentActivity() {
@@ -46,9 +50,19 @@ fun SignupScreen() {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var emailError by remember { mutableStateOf("") }
+    // 邮箱正则表达式
+    val emailPattern = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$"
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-
+    fun validateEmail(input: String) {
+        emailError = if (Pattern.matches(emailPattern, input)) {
+            "" // 合法
+        } else {
+            "邮箱格式不正确"
+        }
+    }
     Scaffold(
         content = { paddingValues ->
             Column(
@@ -96,7 +110,31 @@ fun SignupScreen() {
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
+                // 输入邮箱
+                TextField(
+                    value = email,
+                    onValueChange = {
+                        email = it
+                        validateEmail(it) // 验证邮箱
+                    },
+                    label = { Text("邮箱") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth(),
+                    isError = emailError.isNotEmpty(),
+                    singleLine = true
+                )
 
+                // 错误提示
+                if (emailError.isNotEmpty()) {
+                    Text(
+                        text = emailError,
+                        color = Color.Red,
+                        style = TextStyle(fontSize = 12.sp),
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
                 // 错误信息显示
                 errorMessage?.let {
                     Text(
@@ -125,7 +163,7 @@ fun SignupScreen() {
                                 // 调用注册接口
                                 val response = withContext(Dispatchers.IO) {
                                     NetworkManager.authService.signup(
-                                        NetworkManager.SignupRequest(username, password, "123456@qq.com")
+                                        NetworkManager.SignupRequest(username, password, email)
                                     )
                                 }
                                 Log.d("NetworkRequest", "Request was sent successfully")

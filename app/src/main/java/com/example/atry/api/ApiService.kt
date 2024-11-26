@@ -41,11 +41,11 @@ interface AuthService {
     @GET("user/avatar/{userId}")
     suspend fun getAvatar(@Path("userId") userId: String): Response<ResponseBody>
     @Multipart
-    @POST("user/avatar/upload")
+    @POST("user/upload_avator")
     suspend fun uploadAvatar(
-        @Part("userId") userId: RequestBody,
-        @Part avatar: MultipartBody.Part
+        @Part("id") id: RequestBody,
+        @Part avator: MultipartBody.Part
     ): Response<Void>
-    @POST("/message/send")
+    @POST("message/send")
     suspend fun sendMessage(@Body request: NetworkManager.SendMessRequest):Response<ResponseBody>
 }
