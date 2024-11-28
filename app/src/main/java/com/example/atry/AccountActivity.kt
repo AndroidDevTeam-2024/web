@@ -13,6 +13,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,10 +23,18 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import coil.compose.rememberImagePainter
+import coil.request.ImageRequest
+import com.example.atry.api.NetworkManager
+import com.example.atry.model.UserSession
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.Serializable
+
 
 class AccountActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,6 +46,118 @@ class AccountActivity : ComponentActivity() {
 
     @Composable
     fun MainScreen() {
+        val coroutineScope = rememberCoroutineScope()
+        val commoditySample = remember { mutableStateListOf<Commodity>() }
+        val dealSample = remember { mutableStateListOf<Deal>() }
+
+
+        //获取自己所有商品
+        coroutineScope.launch {
+            try {
+                // 第一次请求，获取商品列表
+                val response = withContext(Dispatchers.IO) {
+                    NetworkManager.authService.loadmycommodity(UserSession.getInstance().id)
+                }
+
+                if (response.isSuccessful) {
+                    val loadResponse = response.body()
+                    if (loadResponse != null) {
+                        println("获取商品列表成功")
+
+                        // 使用 `for` 遍历商品 ID
+                        for (item in loadResponse.commodities) {
+                            // 发起新的请求来获取每个商品的详细信息
+                            if (commoditySample.none { it.id == item.id }) {
+                                commoditySample.add(
+                                    Commodity(
+                                        id = item.id,
+                                        name = item.name,
+                                        price = item.price,
+                                        introduction = item.introduction,
+                                        homepage = item.homepage,
+                                        business_id = item.business_id,
+                                        exist = item.exist
+                                    )
+                                )
+                            }
+                        }
+                    } else {
+                        println("商品列表返回为空")
+                    }
+                } else {
+                    println("获取商品列表失败: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                println("请求失败: ${e.message}")
+            }
+        }
+
+
+        //获取自己所有交易
+        coroutineScope.launch {
+            try {
+                // 第一次请求，获取商品列表
+                val response = withContext(Dispatchers.IO) {
+                    NetworkManager.authService.loadmydeal(UserSession.getInstance().id)
+                }
+
+                if (response.isSuccessful) {
+                    val loadResponse = response.body()
+                    if (loadResponse != null) {
+                        println("获取交易列表成功")
+
+                        // 使用 `for` 遍历商品 ID
+                        for (item in loadResponse.deals) {
+                            // 发起新的请求来获取每个商品的详细信息
+                            if (dealSample.none { it.id == item.id }) {
+                                dealSample.add(
+                                    Deal(
+                                        id = item.id,
+                                        seller = item.seller,
+                                        customer = item.customer,
+                                        commodity = item.commodity,
+                                        date = item.date,
+                                        comment = item.comment
+                                    )
+                                )
+                            }
+                        }
+                    } else {
+                        println("商品列表返回为空")
+                    }
+                } else {
+                    println("获取商品列表失败: ${response.message()}")
+                }
+            } catch (e: Exception) {
+                println("请求失败: ${e.message}")
+            }
+        }
+
+        if (dealSample.none { it.id == 1 }) {
+            dealSample.add(
+                Deal(
+                    id = 1,
+                    seller = 1,
+                    customer = 2,
+                    commodity = 21,
+                    date = "2024-11-01",
+                    comment = "ok"
+                )
+            )
+        }
+        if (dealSample.none { it.id == 2 }) {
+            dealSample.add(
+                Deal(
+                    id = 2,
+                    seller = 2,
+                    customer = 1,
+                    commodity = 25,
+                    date = "2024-11-02",
+                    comment = "okok"
+                )
+            )
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -44,9 +165,9 @@ class AccountActivity : ComponentActivity() {
                 .verticalScroll(rememberScrollState())
         ) {
             // 传入 navigateToSettings 参数，定义按钮点击后的行为
-            HeaderSection()
+            HeaderSection(dealSample)
             Spacer(modifier = Modifier.height(20.dp))
-            MyCommodity()
+            MySection(commoditySample, dealSample)
         }
     }
 
@@ -59,7 +180,7 @@ class AccountActivity : ComponentActivity() {
 
 
     @Composable
-    fun HeaderSection() { // 接收一个跳转的 lambda
+    fun HeaderSection(dealSample: List<Deal>) {
         val context = LocalContext.current
         Box(
             modifier = Modifier
@@ -79,7 +200,7 @@ class AccountActivity : ComponentActivity() {
                 onClick = { navigateToSettings(context) },
                 modifier = Modifier
                     .align(Alignment.TopEnd) // 按钮靠右上角对齐
-                    .padding(top = 8.dp, end = 8.dp) // 调整顶部和右侧的间距，按钮上移
+                    .padding(8.dp) // 调整顶部和右侧的间距
             ) {
                 Icon(
                     painter = painterResource(id = android.R.drawable.ic_menu_preferences), // 使用默认图标
@@ -89,13 +210,15 @@ class AccountActivity : ComponentActivity() {
             }
 
             Row(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 32.dp), // 使顶部内容稍微下移，避免与设置按钮重叠
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // 左侧：头像
                 ProfileImage()
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(16.dp)) // 增加间距使布局更宽松
 
                 // 右侧：用户信息与统计数据
                 Column(
@@ -103,44 +226,39 @@ class AccountActivity : ComponentActivity() {
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.Start
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "name",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(6.dp))
-
+                    // 用户名
                     Text(
-                        text = "123@qq.com",
+                        text = UserSession.getInstance().username,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp)) // 增加更合适的间距
+
+                    // 邮箱
+                    Text(
+                        text = UserSession.getInstance().email,
                         fontSize = 14.sp,
                         color = Color.Gray
                     )
 
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(8.dp)) // 更大的间距让布局更清晰
 
+                    // 交易单数与更新按钮
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        StatItem(label = "关注", value = "83")
-                        StatItem(label = "粉丝", value = "4")
-                        StatItem(label = "售出单数", value = "0")
+                        StatItem(label = "交易单数", value = dealSample.size.toString())
                     }
                 }
-
             }
         }
     }
 
 
     private fun navigateToSettings(context: Context) {
-
         val intent = Intent(context, EditProfileActivity::class.java)
         context.startActivity(intent)
     }
@@ -148,18 +266,23 @@ class AccountActivity : ComponentActivity() {
 
     @Composable
     fun ProfileImage() {
+        // 获取头像的 URL
+        val avatarUrl = UserSession.getInstance().avatar
+
         Box(
             modifier = Modifier
                 .size(80.dp)
                 .clip(CircleShape)
                 .background(Color.White)
         ) {
-            // 可替换成实际图片资源
-            Image(
-                painter = painterResource(id = R.drawable.profile_test),
+            // 使用 rememberImagePainter 来加载网络图片
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(avatarUrl)  // 网络图片 URL
+                    .build(),
                 contentDescription = "Profile Picture",
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.Crop // 让图片裁剪为圆形
             )
         }
     }
@@ -185,34 +308,212 @@ class AccountActivity : ComponentActivity() {
     }
 
 
+    @Composable
+    fun MySection(commoditySample: List<Commodity>, dealSample: List<Deal>) {
+        // 记录当前选中的标签页
+        var selectedTabIndex by remember { mutableStateOf(0) }
+
+        // 商品和订单的示例数据
+        val commodityData = commoditySample
+        val orderData = dealSample // 假设订单数据已存在
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
+        ) {
+            // TabRow 用于切换选项
+            TabRow(
+                selectedTabIndex = selectedTabIndex,
+                modifier = Modifier.fillMaxWidth(),
+                containerColor = Color.White,
+                contentColor = MaterialTheme.colorScheme.primary
+            ) {
+                Tab(
+                    selected = selectedTabIndex == 0,
+                    onClick = { selectedTabIndex = 0 },
+                    text = { Text("我的商品", fontWeight = FontWeight.Bold) }
+                )
+                Tab(
+                    selected = selectedTabIndex == 1,
+                    onClick = { selectedTabIndex = 1 },
+                    text = { Text("我的订单", fontWeight = FontWeight.Bold) }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // 根据选中的标签页动态显示内容
+            if (selectedTabIndex == 0) {
+                MyCommodity(commodityData)
+            } else {
+                MyOrders(orderData)
+            }
+        }
+    }
+
 
 
     @Composable
-    fun MyCommodity() {
+    fun MyCommodity(commodities: List<Commodity>) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
         ) {
-            Text(
-                text = "我的商品",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.Black
-            )
-            Spacer(modifier = Modifier.height(8.dp))
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(360.dp)
                     .background(Color.White, RoundedCornerShape(16.dp))
             ) {
-                items(SampleData.commoditySample) { commodity ->
+                items(commodities) { commodity ->
                     ItemCard(commodity)
                 }
             }
         }
     }
+
+
+
+    @Composable
+    fun MyOrders(orders: List<Deal>) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+        ) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(360.dp)
+                    .background(Color.White, RoundedCornerShape(16.dp))
+            ) {
+                items(orders) { order ->
+                    DealCard(order)
+                }
+            }
+        }
+    }
+
+
+    @Composable
+    fun DealCard(deal: Deal) {
+        val coroutineScope = rememberCoroutineScope()
+        val context = LocalContext.current
+        val currentUserId = UserSession.getInstance().id
+        var commodityname by remember { mutableStateOf("") }
+        var commodityurl by remember { mutableStateOf("") }
+
+
+        coroutineScope.launch {
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    NetworkManager.authService.getcommodity(deal.commodity)
+                }
+
+                if (response.isSuccessful) {
+                    val getResponse = response.body()
+                    if (getResponse != null) {
+                        commodityname = getResponse.name;
+                        commodityurl = getResponse.homepage
+                    } else {
+                        println("返回信息为空")
+                    }
+                } else {
+                    println("返回错误")
+                }
+            } catch (e: Exception) {
+                println("发送失败")
+            }
+        }
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+                .clickable { navigateToDealDetail(deal, context) },
+            shape = RoundedCornerShape(8.dp),
+            elevation = CardDefaults.cardElevation(4.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "订单编号: ${deal.id}",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Display either the seller or buyer details based on the user's role
+                if (currentUserId == deal.seller) {
+                    // User is the seller
+                    Text(
+                        text = "你是卖家",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        color = Color.Green
+                    )
+                } else if (currentUserId == deal.customer) {
+                    // User is the buyer
+                    Text(
+                        text = "你是买家",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        color = Color.Blue
+                    )
+                } else {
+                    // The user is neither the buyer nor the seller (e.g., for admins or other roles)
+                    Text(
+                        text = "卖家 ID: ${deal.seller}",
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                    Text(
+                        text = "买家 ID: ${deal.customer}",
+                        fontSize = 14.sp,
+                        color = Color.Gray
+                    )
+                }
+
+                Text(
+                    text = "商品: $commodityname",
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Display the image if available
+                Image(
+                    painter = rememberImagePainter(commodityurl),
+                    contentDescription = "Commodity Image",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "交易日期: ${deal.date}",
+                    fontSize = 14.sp,
+                    color = Color.Black
+                )
+                Text(
+                    text = "交易评论: ${deal.comment}",
+                    fontSize = 14.sp,
+                    color = Color.Black
+                )
+            }
+        }
+    }
+
+
 
     @Composable
     fun ItemCard(commodity: Commodity) {
@@ -231,12 +532,20 @@ class AccountActivity : ComponentActivity() {
                     .clip(RoundedCornerShape(8.dp))
                     .background(Color.LightGray)
             ) {
-                Image(
-                    painter = painterResource(id = R.drawable.profile_test), // 替换为实际资源
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(commodity.homepage)  // 网络图片 URL
+                        .build(),
                     contentDescription = "Item Image",
                     modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.Crop // 让图片裁剪为圆形
                 )
+//                Image(
+//                    painter = painterResource(id = R.drawable.profile_test), // 替换为实际资源
+//                    contentDescription = "Item Image",
+//                    modifier = Modifier.fillMaxSize(),
+//                    contentScale = ContentScale.Crop
+//                )
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column {
@@ -267,6 +576,11 @@ class AccountActivity : ComponentActivity() {
         context.startActivity(intent)
     }
 
+    private fun navigateToDealDetail(deal: Deal, context: Context) {
+        val intent = Intent(context, DealDetailActivity::class.java)
+        intent.putExtra("deal", deal)  // 将 commodity 对象传递给 Intent
+        context.startActivity(intent)
+    }
 
 
 
@@ -274,90 +588,33 @@ class AccountActivity : ComponentActivity() {
 
 
     object SampleData {
-        val commoditySample = listOf(
+        val commoditySample = mutableListOf(
             Commodity(
                 id = 1,
                 name = "Apple iPhone 15 Pro Max",
                 price = 9999,
                 introduction = "The ultimate smartphone with cutting-edge technology.",
                 homepage = "https://www.apple.com/iphone-15-pro",
+                business_id = UserSession.getInstance().id,
                 exist = true
-            ),
-            Commodity(
-                id = 2,
-                name = "Samsung Galaxy S23 Ultra",
-                price = 7999,
-                introduction = "Experience the power of innovation with the Galaxy series.",
-                homepage = "https://www.samsung.com/galaxy-s23-ultra",
-                exist = true
-            ),
-            Commodity(
-                id = 3,
-                name = "Sony WH-1000XM5",
-                price = 2999,
-                introduction = "Premium noise-cancelling headphones for audiophiles.",
-                homepage = "https://www.sony.com/wh-1000xm5",
-                exist = true
-            ),
-            Commodity(
-                id = 4,
-                name = "Dell XPS 15 Laptop",
-                price = 12999,
-                introduction = "High-performance laptop with stunning 4K display.",
-                homepage = "https://www.dell.com/xps-15",
-                exist = true
-            ),
-            Commodity(
-                id = 5,
-                name = "Nintendo Switch OLED Model",
-                price = 2199,
-                introduction = "Play anytime, anywhere with the vibrant OLED display.",
-                homepage = "https://www.nintendo.com/switch-oled",
-                exist = true
-            ),
-            Commodity(
-                id = 6,
-                name = "Canon EOS R6 Mark II",
-                price = 14999,
-                introduction = "Professional-grade mirrorless camera for stunning photography.",
-                homepage = "https://www.canon.com/eos-r6-mk2",
-                exist = true
-            ),
-            Commodity(
-                id = 7,
-                name = "Dyson V15 Detect Vacuum",
-                price = 4599,
-                introduction = "Effortless cleaning with advanced laser detection technology.",
-                homepage = "https://www.dyson.com/v15-detect",
-                exist = true
-            ),
-            Commodity(
-                id = 8,
-                name = "Bose SoundLink Revolve+ II",
-                price = 2199,
-                introduction = "Portable Bluetooth speaker with immersive 360° sound.",
-                homepage = "https://www.bose.com/soundlink-revolve-plus-2",
-                exist = true
-            ),
-            Commodity(
-                id = 9,
-                name = "Garmin Fenix 7X Sapphire Solar",
-                price = 8999,
-                introduction = "Premium smartwatch with solar charging for outdoor adventurers.",
-                homepage = "https://www.garmin.com/fenix-7x",
-                exist = true
-            ),
-            Commodity(
-                id = 10,
-                name = "Herman Miller Aeron Chair",
-                price = 12999,
-                introduction = "Ergonomic office chair designed for maximum comfort.",
-                homepage = "https://www.hermanmiller.com/aeron",
-                exist = true
+            )
+        )
+        // 示例交易数据
+        val dealSample = mutableListOf(
+            Deal(
+                id = 1,
+                seller = 101,
+                customer = 201,
+                commodity = 301,
+                date = "2024-11-01",
+                comment = "商品质量不错，满意！"
             )
         )
     }
 
-    data class Commodity(val id: Int, val name: String, val price: Int, val introduction: String, val homepage: String, val exist: Boolean) : Serializable
+    data class Commodity(val id: Int, val name: String, val price: Int, val introduction: String, val business_id: Int, val homepage: String, val exist: Boolean) : Serializable
+
+    data class Deal(val id: Int, val seller: Int, val customer: Int, val commodity: Int, var date: String, var comment: String) : Serializable
+
 
 }

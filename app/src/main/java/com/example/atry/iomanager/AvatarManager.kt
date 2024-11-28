@@ -48,7 +48,7 @@ object AvatarManager {
      */
     suspend fun getUserAvatar(context: Context, id : String) {
 
-        val response = authService.getAvatar(id)
+        val response = authService.getAvatar(id.toInt())
         if (response.isSuccessful && response.body() != null) {
             // 获取头像的 InputStream
             val inputStream = response.body()?.byteStream()
@@ -104,6 +104,44 @@ object AvatarManager {
         } else {
             Log.e("UploadAvatar", "Failed to upload avatar: ${response.code()}")
         }
+    }
+
+
+    //给商品上传图片
+    suspend fun uploadAvatarWithCommodityId(
+        commodityId: String,
+        avatar: Bitmap,
+        filename: String
+    ) {
+        // 创建 Retrofit 实例
+
+        val commodityIdRequestBody = createCommodityIdRequestBody(commodityId)
+        val avatarPart = createAvatarPartFromBitmap1(avatar, filename)
+        // 调用接口上传
+        val response = authService.uploadCommodityAvatar(commodityIdRequestBody, avatarPart)
+
+        if (response.isSuccessful) {
+            Log.d("UploadCommodityAvatar", "Avatar uploaded successfully for commodityId: $commodityId")
+        } else {
+            Log.e("UploadCommodityAvatar", "Failed to upload avatar: ${response.code()}")
+        }
+    }
+
+    private fun createCommodityIdRequestBody(commodityId: String): RequestBody {
+        return commodityId.toRequestBody("text/plain".toMediaTypeOrNull())
+    }
+
+    private fun createAvatarPartFromBitmap1(avatar: Bitmap, filename: String): MultipartBody.Part {
+        // 将 Bitmap 压缩为 ByteArray
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        avatar.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream)
+        val avatarBytes = byteArrayOutputStream.toByteArray()
+
+        // 创建 RequestBody
+        val requestBody = avatarBytes.toRequestBody("image/png".toMediaTypeOrNull(), 0)
+
+        // 创建 MultipartBody.Part
+        return MultipartBody.Part.createFormData("homepage", filename, requestBody)
     }
 
 }

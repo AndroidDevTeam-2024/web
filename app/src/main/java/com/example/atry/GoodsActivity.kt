@@ -62,7 +62,6 @@ fun GoodsScreen() {
     fun navigateToDetail(product: Product) {
         val intent = Intent(context, GoodsDetailActivity::class.java).apply {
             putExtra("id", product.id)
-            putExtra("name", product.name)
         }
         context.startActivity(intent)
     }
@@ -109,7 +108,7 @@ fun GoodsScreen() {
                         onResult = { filteredProducts -> filteredList.value = filteredProducts }
                     )
                 },
-                modifier = Modifier.height(56.dp)
+                modifier = Modifier.height(40.dp)
             ) {
                 Text("搜索")
             }
@@ -167,7 +166,7 @@ private suspend fun loadAllProducts(
     try {
         val response = apiService.allGoods()
         if (response.isSuccessful) {
-            val products = response.body()?.toList() ?: emptyList()
+            val products = response.body()?.commodities?.toList() ?: emptyList()
             filteredList.value = products
         }
     } catch (e: Exception) {
@@ -186,10 +185,9 @@ private fun searchProductsByCategory(
     CoroutineScope(Dispatchers.IO).launch {
         try {
             val type = switchType(category);
-            val request = if (type == "all") null else type
-            val response = apiService.categoryGoods(request.toString())
+            val response = apiService.categoryGoods(type)
             if (response.isSuccessful) {
-                val filtered = response.body()?.toList() ?: emptyList()
+                val filtered = response.body()?.commodities?.toList() ?: emptyList()
                 val searchFiltered = if (searchText.isNotBlank()) {
                     filtered.filter { it.name.contains(searchText, ignoreCase = true) }
                 } else {
@@ -233,7 +231,7 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             AsyncImage(
-                model = product.imageUrl,
+                model = product.homepage,
                 contentDescription = null,
                 modifier = Modifier
                     .size(88.dp),

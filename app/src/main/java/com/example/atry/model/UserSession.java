@@ -2,11 +2,13 @@ package com.example.atry.model;
 
 public class UserSession {
     private static UserSession instance;
-    private Integer id;
-    private String username;
-    private String email;
+    private Integer id = 1;
+    private String username = "请修改名称";
+    private String email = "请添加邮箱";
     private String token;
-    private String avatar;
+    private String avatar = "https://loremflickr.com/400/400?lock=8001606861822272";
+    public static String encryptionKey = "1234567890123456";
+
 
     private UserSession() {}
 

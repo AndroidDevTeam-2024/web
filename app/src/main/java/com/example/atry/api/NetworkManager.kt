@@ -1,5 +1,7 @@
 package com.example.atry.api
 
+import com.example.atry.AccountActivity
+import com.example.atry.model.Product
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import okhttp3.OkHttpClient
@@ -53,14 +55,89 @@ object NetworkManager {
         val id1: Int,
         val id2: Int
     )
-    data class TalkResponse(
-        val messages: List<Message>
+    data class  TalkResponse(
+        val messages: List<Message>,
+        val date: String
     )
 
     data class SendMessRequest (
-        val message : Message,
-        val acceptor : String
+        val acceptor: Int,
+        val publisher: Int,
+        val content: String
     )
+
+    //商品注册
+    data class RegisterCommodityRequest (
+        val name: String,
+        val price: Int,
+        val introduction: String,
+        val business_id: Int,
+        val category: String
+    )
+
+    data class RegisterCommodityResponse (
+        val id: Int,
+        val homepage: String,
+    )
+
+    //加载商品
+    data class LoadmycommodityResponse (
+        val commodities: Array<AccountActivity.Commodity>
+    )
+
+    //加载交易
+    data class LoadmydealResponse (
+        val deals: Array<AccountActivity.Deal>
+    )
+
+    data class EditProfileRequest (
+        val name: String,
+        val password: String,
+        val email: String
+    )
+
+    data class EditCommodityRequest (
+        val name: String,
+        val price: Int,
+        val introduction: String
+    )
+
+    data class GetCommodityResponse(
+        val id: Int,
+        val name: String,
+        val price: Int,
+        val introduction: String,
+        val business_id: Int,
+        val homepage: String,
+        val exist: Boolean
+    )
+
+    data class GetUserResponse(
+        val id: Int,
+        val name: String,
+        val email: String,
+        val avator: String,
+    )
+
+    data class AddCommentRequest(
+        val deal_id: Int,
+        val comment: String,
+        val date: String
+    )
+
+    data class AllGoodsResponse(
+        val commodities: Array<Product>
+    )
+
+//    data class GetcommodityResponse (
+//        val id: Int,
+//        val name: String,
+//        val price: Int,
+//        val introduction: String,
+//        val business_id: Int,
+//        val homepage: String,
+//        val exist: Boolean
+//    )
 
 
     val authService: AuthService = retrofit.create(AuthService::class.java)
@@ -78,11 +155,42 @@ object NetworkManager {
     )
     data class ProductDetail(
         val id: Int,
-        val information: String,
+        val name:String,
         val price: String,
-        val email: String,
-        val imageUrl: String
+        val introduction: String,
+        val business_id: Int,
+        val homepage: String,
+        val exist: Boolean
     )
+
+    data class FetchMessResponse(
+        val messages : List<AvaMessage>
+    )
+
+    data class RefreshRequest(
+        val id1 : Int,
+        val id2 : Int,
+        val date: String
+
+    )
+
+    data class messageResponse(
+        val message: Message
+    )
+
+    data class AvaMessage(
+        val id: Int,
+        val senderId: Int,
+        val senderName: String,
+        val content: String,
+        val avator: String
+    )
+
+    data class avatarResponse(
+        val avator: String
+    )
+
+
 
 
 

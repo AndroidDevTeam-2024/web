@@ -26,7 +26,10 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.example.atry.api.NetworkManager
+import com.example.atry.iomanager.AvatarManager.uploadAvatarWithCommodityId
 import com.example.atry.iomanager.AvatarManager.uploadAvatarWithUserId
+import com.example.atry.model.UserSession
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -62,11 +65,13 @@ class RegisterCommodityActivity : ComponentActivity() {
         var name by remember { mutableStateOf("") }
         var price by remember { mutableStateOf("") }
         var introduction by remember { mutableStateOf("") }
-        var tag by remember { mutableStateOf("全部") } // 默认选中 "全部"
-        val options = listOf("全部", "书籍", "电子产品", "生活用品", "食品", "else") // 选项列表
+        var tag by remember { mutableStateOf("all") } // 默认选中 "全部"
+        val options = listOf("all", "books", "electronics", "daily_supplies", "food", "else") // 选项列表
         var expanded by remember { mutableStateOf(false) } // 控制下拉菜单的显示状态
-
+        val coroutineScope = rememberCoroutineScope()
+        var commodityid by remember { mutableIntStateOf(0) }
         val scrollState = rememberScrollState()
+
 
         Column(
             modifier = Modifier
@@ -207,13 +212,41 @@ class RegisterCommodityActivity : ComponentActivity() {
                 // 提交按钮
                 Button(
                     onClick = {
-                        CoroutineScope(Dispatchers.Main).launch {
+                        coroutineScope.launch{
+                            try {
+                                val response = withContext(Dispatchers.IO) {
+                                    NetworkManager.authService.registercommodity(
+                                        NetworkManager.RegisterCommodityRequest(
+                                            name,
+                                            price.toInt(),
+                                            introduction,
+                                            UserSession.getInstance().id,
+                                            tag
+                                        )
+                                    )
+                                }
+                                if (response.isSuccessful) {
+                                    val registerResponse = response.body()
+                                    if (registerResponse != null) {
+                                        commodityid = registerResponse.id
+                                        println("first step success")
+                                        println(registerResponse.id)
+                                    } else {
+                                        println("back id error")
+                                    }
+                                } else {
+                                    println("bug")
+                                }
+                            } catch (e: Exception) {
+                                println("failed")
+                            }
+
                             try {
                                 val bitmap = loadBitmapFromUri(selectedImageUri!!)
                                 // 使用后台线程执行耗时操作
                                 val response = withContext(Dispatchers.IO) {
                                     if (bitmap != null) {
-                                        uploadAvatarWithUserId("1", bitmap, "image")
+                                        uploadAvatarWithCommodityId(commodityid.toString(), bitmap, "image")
                                     }
                                 }
 
@@ -222,7 +255,7 @@ class RegisterCommodityActivity : ComponentActivity() {
                                 e.printStackTrace()
                             }
                         }
-                              },
+                    },
                     modifier = Modifier.weight(1f)
                 ) {
                     Text("Submit")

@@ -29,16 +29,15 @@ class GoodsDetailActivity : ComponentActivity() {
 
         // 获取传递过来的商品信息
         val id = intent.getIntExtra("id", 0)
-        val name = intent.getStringExtra("name")
 
         setContent {
-                GoodsDetailScreen(id = id, name = name.toString())
+                GoodsDetailScreen(id = id)
         }
     }
 }
 
 @Composable
-fun GoodsDetailScreen(id: Int, name: String) {
+fun GoodsDetailScreen(id: Int) {
     // 商品详情状态
     val productDetail = remember { mutableStateOf<NetworkManager.ProductDetail?>(null) }
     val isLoading = remember { mutableStateOf(true) }
@@ -60,6 +59,25 @@ fun GoodsDetailScreen(id: Int, name: String) {
         }
     }
 
+    val businessId = productDetail.value?.business_id
+    var email by remember { mutableStateOf("") }
+    LaunchedEffect(businessId) {
+        try {
+            val response = businessId?.let { NetworkManager.authService.getuser(it.toInt()) }
+            if (response != null) {
+                if (response.isSuccessful) {
+                    email = response.body()?.email.toString()
+                } else {
+                    errorMessage.value = "Failed to get email: ${response.errorBody()?.string()}"
+                }
+            }
+        } catch (e: Exception) {
+            errorMessage.value = "Network error: ${e.message}"
+        } finally {
+            isLoading.value = false
+        }
+    }
+
     // UI 显示逻辑
     if (isLoading.value) {
         LoadingIndicator()
@@ -67,7 +85,7 @@ fun GoodsDetailScreen(id: Int, name: String) {
         ErrorText(errorMessage = errorMessage.value!!)
     } else {
         productDetail.value?.let {
-            ProductDetailContent(productDetail = it, name = name)
+            ProductDetailContent(productDetail = it, email = email)
         }
     }
 }
@@ -97,7 +115,8 @@ fun ErrorText(errorMessage: String) {
 }
 
 @Composable
-fun ProductDetailContent(productDetail: NetworkManager.ProductDetail, name: String) {
+fun ProductDetailContent(productDetail: NetworkManager.ProductDetail, email: String) {
+    println(email)
     val context = LocalContext.current
     Column(
         modifier = Modifier
@@ -114,7 +133,7 @@ fun ProductDetailContent(productDetail: NetworkManager.ProductDetail, name: Stri
                 .height(240.dp)
         ) {
             AsyncImage(
-                model = productDetail.imageUrl,
+                model = productDetail.homepage,
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
@@ -124,7 +143,7 @@ fun ProductDetailContent(productDetail: NetworkManager.ProductDetail, name: Stri
 
         // 商品名称
         Text(
-            text = name,
+            text = productDetail.name,
             style = MaterialTheme.typography.titleLarge.copy(fontSize = 26.sp),
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(bottom = 8.dp)
@@ -155,7 +174,7 @@ fun ProductDetailContent(productDetail: NetworkManager.ProductDetail, name: Stri
 
         // 商品描述内容
         Text(
-            text = productDetail.information,
+            text = productDetail.introduction,
             style = MaterialTheme.typography.bodyLarge,
             modifier = Modifier.padding(bottom = 16.dp)
         )
@@ -181,7 +200,7 @@ fun ProductDetailContent(productDetail: NetworkManager.ProductDetail, name: Stri
                 modifier = Modifier.padding(end = 8.dp)
             )
             Text(
-                text = productDetail.email,
+                text = email,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.secondary
             )
@@ -189,10 +208,9 @@ fun ProductDetailContent(productDetail: NetworkManager.ProductDetail, name: Stri
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 返回按钮
         Button(
             onClick = {  val intent = Intent(context, TalkActivity::class.java).apply {
-                putExtra("senderId", productDetail.id)
+                putExtra("senderId", productDetail.business_id)
             }
                 context.startActivity(intent)
                       },

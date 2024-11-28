@@ -1,6 +1,5 @@
 package com.example.atry
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
@@ -92,6 +91,7 @@ class LoginActivity: ComponentActivity() {
                             }
                             Log.d("NetworkRequest", "Request was sent successfully")
                             if (response.isSuccessful) {
+                                UserSession.getInstance().username = name
                                 val loginResponse = response.body()
                                 if (loginResponse != null) {
                                     onLoginSuccess(loginResponse)
@@ -136,7 +136,6 @@ class LoginActivity: ComponentActivity() {
 
         // 保存用户 Token
         saveToken(loginResponse)
-        println("12233")
         // 显示登录成功提示
         showSuccessMessage()
 
