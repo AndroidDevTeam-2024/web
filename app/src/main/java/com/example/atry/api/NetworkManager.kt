@@ -174,6 +174,16 @@ object NetworkManager {
 
     )
 
+    data class dealRequest(
+        val seller:Int,
+        val customer:Int,
+        val commodity: Int
+    )
+
+    data class dealResponse(
+        val id :Int
+    )
+
     data class messageResponse(
         val message: Message
     )

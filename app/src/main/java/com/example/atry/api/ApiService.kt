@@ -89,7 +89,7 @@ interface AuthService {
     @GET("/message/find_by_receiver/{id}")
     suspend fun fetchMessages(@Path("id") userId: Int) :Response<NetworkManager.FetchMessResponse>
 
-    @POST
+    @POST("message/delete/talk")
     suspend fun deleteTalk(@Body request: NetworkManager.TalkRequest): Response<ResponseBody>
 
     @POST("message/talk")
@@ -100,6 +100,7 @@ interface AuthService {
 
     @GET("user/get_avator/{userId}")
     suspend fun getAvatarTalk(@Path("userId") userId: Int): Response<NetworkManager.avatarResponse>
-
+    @POST("/deal/post")
+    suspend fun createDeal(@Body request: NetworkManager.dealRequest): Response<NetworkManager.dealResponse>
 
 }
