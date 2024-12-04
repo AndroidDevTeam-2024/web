@@ -57,7 +57,7 @@ class OrderActivity : ComponentActivity() {
         if (buy != "") {
             buyerId = buy.toInt()
         }
-        CoroutineScope(Dispatchers.IO).launch {
+        CoroutineScope(Dispatchers.Main).launch {
             try {
                 val response = authService.getcommodity(comId)
                 if (response.isSuccessful) {
