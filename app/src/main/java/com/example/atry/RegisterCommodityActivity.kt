@@ -259,6 +259,13 @@ class RegisterCommodityActivity : ComponentActivity() {
                                 // 处理异常
                                 e.printStackTrace()
                             }
+
+                            // 跳转到 MainActivity 并显示 mainScreen
+                            val intent = Intent(this@RegisterCommodityActivity, MainActivity::class.java).apply {
+                                putExtra("SHOW_MAIN_SCREEN", true) // 传递标识
+                            }
+                            startActivity(intent)
+                            finish() // 销毁当前活动
                         }
                     },
                     modifier = Modifier.weight(1f)

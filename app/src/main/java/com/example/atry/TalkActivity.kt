@@ -198,7 +198,7 @@ class TalkActivity : ComponentActivity() {
                             value = newMessage,
                             onValueChange = { newMessage = it },
                             modifier = Modifier.weight(1f), // 输入框占据剩余空间
-                            placeholder = { Text("Type a message...") },
+                            placeholder = { Text("请发送消息...") },
                             maxLines = 1,
                             colors = TextFieldDefaults.colors(
                                 focusedPrefixColor = Color.Blue,
@@ -220,7 +220,7 @@ class TalkActivity : ComponentActivity() {
                                     contentColor = Color.Black
                                 )
                             ) {
-                                Text("Order")
+                                Text("订购")
                             }
                             Spacer(modifier = Modifier.width(4.dp)) // 按钮间距
                         }
@@ -235,7 +235,7 @@ class TalkActivity : ComponentActivity() {
                             },
                             modifier = Modifier.widthIn(min = 80.dp) // 给按钮设置最小宽度
                         ) {
-                            Text("Send")
+                            Text("发送")
                         }
                     }
                 }

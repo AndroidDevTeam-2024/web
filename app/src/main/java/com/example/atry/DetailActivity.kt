@@ -105,7 +105,7 @@ class DetailActivity : ComponentActivity() {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(120.dp) // 设置固定高度
+                    .height(400.dp) // 设置固定高度
                     .padding(bottom = 24.dp)
                     .clip(RoundedCornerShape(8.dp)) // 圆角
                     .background(Color(0xFFF5F5F5)) // 更柔和的背景色
@@ -166,7 +166,7 @@ class DetailActivity : ComponentActivity() {
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White)
                 ) {
-                    Text("Delete", color = Color(0xFFE54B46))
+                    Text("删除", color = Color(0xFFE54B46))
                 }
 
                 // 立即购买按钮
@@ -179,7 +179,7 @@ class DetailActivity : ComponentActivity() {
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.White)
                 ) {
-                    Text("Edit", color = Color(0xFF0A74DA))
+                    Text("编辑", color = Color(0xFF0A74DA))
                 }
             }
         }

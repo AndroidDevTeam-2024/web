@@ -98,7 +98,7 @@ fun OrderScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Order Details") },
+                title = { Text(text = "订单详情") },
                 navigationIcon = {
                     IconButton(onClick = { (context as? Activity)?.finish() }) {
                         Icon(
@@ -175,7 +175,7 @@ fun OrderScreen(
                         contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
-                    Text(text = "Confirm Order")
+                    Text(text = "确认订单")
                 }
 
 
@@ -192,7 +192,7 @@ fun OrderScreen(
                         contentColor = Color.White
                     )
                 ) {
-                    Text(text = "Reject Order")
+                    Text(text = "拒绝订单")
                 }
             }
         }
@@ -244,7 +244,7 @@ fun reject(business_id:Int
         try {
             // 创建发送消息的请求
             val request =
-                NetworkManager.SendMessRequest(buyerId, business_id, "我拒绝了此订单: 商品ID{$commodityId}")
+                NetworkManager.SendMessRequest(buyerId, business_id, "我拒绝了此订单")
             // 发送请求并获取响应
             val response = authService.sendMessage(request)
             // 判断响应是否成功

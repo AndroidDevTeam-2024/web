@@ -84,13 +84,13 @@ class EditCommodityActivity : ComponentActivity() {
                 .verticalScroll(scrollState),  // 使 Column 支持垂直滚动
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(text = "Edit Commodity", style = MaterialTheme.typography.headlineSmall)
+            Text(text = "编辑商品", style = MaterialTheme.typography.headlineSmall)
 
             // Name Field
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Name") },
+                label = { Text("名称") },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -98,7 +98,7 @@ class EditCommodityActivity : ComponentActivity() {
             OutlinedTextField(
                 value = price,
                 onValueChange = { price = it },
-                label = { Text("Price") },
+                label = { Text("价格") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
@@ -107,7 +107,7 @@ class EditCommodityActivity : ComponentActivity() {
             OutlinedTextField(
                 value = introduction,
                 onValueChange = { introduction = it },
-                label = { Text("Introduction") },
+                label = { Text("介绍") },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -134,7 +134,7 @@ class EditCommodityActivity : ComponentActivity() {
                     }
                 } else {
                     Text(
-                        text = "click here to change image if necessary",
+                        text = "点击此处选择图片",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -189,7 +189,7 @@ class EditCommodityActivity : ComponentActivity() {
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Save")
+                Text("保存")
             }
         }
     }
