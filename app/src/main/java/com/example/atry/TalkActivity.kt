@@ -17,12 +17,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -153,73 +155,79 @@ class TalkActivity : ComponentActivity() {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(700.dp),
-                    verticalArrangement = Arrangement.Top
+                        .fillMaxHeight(),
+                    verticalArrangement = Arrangement.Bottom // 让输入框始终在底部
                 ) {
                     // 聊天消息列表
                     LazyColumn(
                         modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f) // 让LazyColumn占据剩余空间，避免与输入框重叠
                             .padding(8.dp),
+                        reverseLayout = true // 设置列表从底部开始增长
                     ) {
-                        items(messages) { message ->
+                        items(messages.reversed()) { message ->
                             ChatBubble(
                                 message = message, senderId = senderId, context = context,
                                 avatar1 = avatar1, avatar2 = avatar2
                             )
                         }
                     }
-                }
-                // 输入栏
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Bottom
-                ) {
+
+                    // 输入框和按钮区域
                     Row(
                         modifier = Modifier
-                            .padding(8.dp)
                             .fillMaxWidth()
                             .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(8.dp))
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween // 确保按钮分布均匀
                     ) {
+                        // 输入框
                         TextField(
                             value = newMessage,
                             onValueChange = { newMessage = it },
-                            modifier = Modifier.weight(1f),
+                            modifier = Modifier.weight(1f), // 输入框占据剩余空间
                             placeholder = { Text("Type a message...") },
                             maxLines = 1,
                             colors = TextFieldDefaults.colors(
-                                focusedPrefixColor = Color.Blue, // 聚焦时的前缀颜色
-                                unfocusedPrefixColor = Color.Gray // 未聚焦时的前缀颜色
+                                focusedPrefixColor = Color.Blue,
+                                unfocusedPrefixColor = Color.Gray
                             )
                         )
+
                         Spacer(modifier = Modifier.width(8.dp))
 
                         // 如果 isOrderButtonVisible 为 true，显示 Order 按钮
                         if (isOrder) {
-                            Button(onClick = {
-                                sendOrderMessage(publisher = id1,
-                                    acceptor = senderId, comId.toInt(), messages)
-                            },
+                            Button(
+                                onClick = {
+                                    sendOrderMessage(publisher = id1, acceptor = senderId, comId.toInt(), messages)
+                                },
+                                modifier = Modifier.widthIn(min = 80.dp), // 给按钮设置最小宽度
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color.Yellow, // 设置按钮背景色为黄色
-                                    contentColor = Color.Black // 设置按钮文字颜色为黑色
+                                    containerColor = Color.Yellow,
+                                    contentColor = Color.Black
                                 )
                             ) {
                                 Text("Order")
                             }
-                            Spacer(modifier = Modifier.width(8.dp))  // 保持按钮之间的间距
+                            Spacer(modifier = Modifier.width(4.dp)) // 按钮间距
                         }
 
                         // 发送消息按钮
-                        Button(onClick = {
-                            if (newMessage.isNotBlank()) {
-                                sendMessage(userId = id1, senderId, newMessage, messages)
-                                newMessage = "" // 清空输入框
-                            }
-                        }) {
+                        Button(
+                            onClick = {
+                                if (newMessage.isNotBlank()) {
+                                    sendMessage(userId = id1, senderId, newMessage, messages)
+                                    newMessage = "" // 清空输入框
+                                }
+                            },
+                            modifier = Modifier.widthIn(min = 80.dp) // 给按钮设置最小宽度
+                        ) {
                             Text("Send")
                         }
                     }
+
                 }
             }
         }
