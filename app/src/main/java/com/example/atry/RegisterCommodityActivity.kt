@@ -93,7 +93,7 @@ class RegisterCommodityActivity : ComponentActivity() {
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Commodity Name") },
+                label = { Text("商品名") },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -103,7 +103,7 @@ class RegisterCommodityActivity : ComponentActivity() {
             OutlinedTextField(
                 value = price,
                 onValueChange = { price = it },
-                label = { Text("Price") },
+                label = { Text("价格") },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
@@ -114,14 +114,14 @@ class RegisterCommodityActivity : ComponentActivity() {
             OutlinedTextField(
                 value = introduction,
                 onValueChange = { introduction = it },
-                label = { Text("Introduction") },
+                label = { Text("介绍") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             // 商品种类选择题
-            Text(text = "Tag", style = MaterialTheme.typography.bodyMedium)
+            Text(text = "标签", style = MaterialTheme.typography.bodyMedium)
             ExposedDropdownMenuBox(
                 expanded = expanded,
                 onExpandedChange = { expanded = !expanded }
@@ -129,7 +129,7 @@ class RegisterCommodityActivity : ComponentActivity() {
                 OutlinedTextField(
                     value = tag,
                     onValueChange = {},
-                    label = { Text("Select Tag") },
+                    label = { Text("选择标签") },
                     readOnly = true, // 只读，防止手动输入
                     modifier = Modifier
                         .menuAnchor()
@@ -159,7 +159,7 @@ class RegisterCommodityActivity : ComponentActivity() {
 
             // 图片展示区域
             Text(
-                text = "Upload Image",
+                text = "上传图片",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.secondary
             )
@@ -179,7 +179,7 @@ class RegisterCommodityActivity : ComponentActivity() {
                     bitmap?.let {
                         Image(
                             bitmap = it.asImageBitmap(),
-                            contentDescription = "Selected Image",
+                            contentDescription = "选择图片",
                             modifier = Modifier
                                 .fillMaxSize()
                                 .clip(RoundedCornerShape(8.dp)),
@@ -188,7 +188,7 @@ class RegisterCommodityActivity : ComponentActivity() {
                     }
                 } else {
                     Text(
-                        text = "No image selected",
+                        text = "未选择图片",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -207,7 +207,7 @@ class RegisterCommodityActivity : ComponentActivity() {
                     onClick = { pickImage() },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("Pick Image")
+                    Text("选择图片")
                 }
 
                 val context = LocalContext.current
@@ -263,7 +263,7 @@ class RegisterCommodityActivity : ComponentActivity() {
                     },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("Submit")
+                    Text("提交")
                 }
             }
         }

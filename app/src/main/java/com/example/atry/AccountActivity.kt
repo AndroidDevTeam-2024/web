@@ -3,9 +3,11 @@ package com.example.atry
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -34,6 +36,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.Serializable
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 
 class AccountActivity : ComponentActivity() {
@@ -44,6 +49,7 @@ class AccountActivity : ComponentActivity() {
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("CoroutineCreationDuringComposition")
     @Composable
     fun MainScreen() {
@@ -119,7 +125,7 @@ class AccountActivity : ComponentActivity() {
                                         seller = item.seller,
                                         customer = item.customer,
                                         commodity = item.commodity,
-                                        date = item.date,
+                                        date = convertToLocalDateTime(item.date),
                                         comment = item.comment
                                     )
                                 )
@@ -612,5 +618,25 @@ class AccountActivity : ComponentActivity() {
 
     data class Deal(val id: Int, val seller: Int, val customer: Int, val commodity: Int, var date: String, var comment: String) : Serializable
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun convertToLocalDateTime(utcDate: String): String {
+        return try {
+            // 定义解析 UTC 时间的 DateTimeFormatter
+            val utcFormatter = DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.of("UTC"))
+
+            // 使用 Instant 解析 UTC 时间字符串
+            val instant = Instant.from(utcFormatter.parse(utcDate))
+
+            // 格式化为本地时间，使用系统默认时区
+            val localFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+                .withZone(ZoneId.systemDefault())
+
+            // 转换并返回本地时间
+            localFormatter.format(instant)
+        } catch (e: Exception) {
+            // 错误处理，若格式解析失败，则返回原字符串
+            utcDate
+        }
+    }
 
 }

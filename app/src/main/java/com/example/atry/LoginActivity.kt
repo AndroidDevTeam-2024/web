@@ -60,7 +60,7 @@ class LoginActivity: ComponentActivity() {
             TextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("name") },
+                label = { Text("账号") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -68,7 +68,7 @@ class LoginActivity: ComponentActivity() {
             TextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Password") },
+                label = { Text("密码") },
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth()
             )
@@ -117,7 +117,7 @@ class LoginActivity: ComponentActivity() {
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Text("Login")
+                    Text("登录")
                 }
             }
             Button(
@@ -126,7 +126,7 @@ class LoginActivity: ComponentActivity() {
                           },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Signup")
+                Text("注册")
             }
         }
 
