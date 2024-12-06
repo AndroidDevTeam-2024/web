@@ -152,7 +152,7 @@ class EditCommodityActivity : ComponentActivity() {
                         try {
                             val response = withContext(Dispatchers.IO) {
                                 NetworkManager.authService.editcommodity(
-                                    UserSession.getInstance().id,
+                                    commodity.id,
                                     NetworkManager.EditCommodityRequest(
                                         name,
                                         price.toInt(),
@@ -161,15 +161,9 @@ class EditCommodityActivity : ComponentActivity() {
                                 )
                             }
                             if (response.isSuccessful) {
-                                val loginResponse = response.body()
-                                if (loginResponse != null) {
-                                    println("success")
-                                    Toast.makeText(context, "修改成功", Toast.LENGTH_SHORT).show()
-                                } else {
-                                    println("success")
-                                }
+                                Toast.makeText(context, "修改成功", Toast.LENGTH_SHORT).show()
                             } else {
-                                println("failed")
+                                Toast.makeText(context, "修改失败", Toast.LENGTH_SHORT).show()
                             }
                         } catch (e: Exception) {
                             println("send failed")
@@ -181,7 +175,7 @@ class EditCommodityActivity : ComponentActivity() {
                                 // 使用后台线程执行耗时操作
                                 val response = withContext(Dispatchers.IO) {
                                     if (bitmap != null) {
-                                        uploadAvatarWithCommodityId(commodity.id.toString(), bitmap, "image")
+                                        uploadAvatarWithCommodityId(commodity.id.toString(), bitmap, "imagecommodity${commodity.id}")
                                     }
                                 }
 

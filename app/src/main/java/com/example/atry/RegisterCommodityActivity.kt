@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.example.atry.api.NetworkManager
@@ -209,6 +210,7 @@ class RegisterCommodityActivity : ComponentActivity() {
                     Text("Pick Image")
                 }
 
+                val context = LocalContext.current
                 // 提交按钮
                 Button(
                     onClick = {
@@ -229,6 +231,7 @@ class RegisterCommodityActivity : ComponentActivity() {
                                     val registerResponse = response.body()
                                     if (registerResponse != null) {
                                         commodityid = registerResponse.id
+                                        Toast.makeText(context, "商品注册成功", Toast.LENGTH_SHORT).show()
                                         println("first step success")
                                         println(registerResponse.id)
                                     } else {
@@ -246,7 +249,9 @@ class RegisterCommodityActivity : ComponentActivity() {
                                 // 使用后台线程执行耗时操作
                                 val response = withContext(Dispatchers.IO) {
                                     if (bitmap != null) {
-                                        uploadAvatarWithCommodityId(commodityid.toString(), bitmap, "image")
+                                        uploadAvatarWithCommodityId(commodityid.toString(), bitmap,
+                                            "imagecommodity$commodityid"
+                                        )
                                     }
                                 }
 

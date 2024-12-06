@@ -44,11 +44,14 @@ class AccountActivity : ComponentActivity() {
         }
     }
 
+    @SuppressLint("CoroutineCreationDuringComposition")
     @Composable
     fun MainScreen() {
         val coroutineScope = rememberCoroutineScope()
         val commoditySample = remember { mutableStateListOf<Commodity>() }
         val dealSample = remember { mutableStateListOf<Deal>() }
+
+
 
 
         //获取自己所有商品
@@ -133,30 +136,30 @@ class AccountActivity : ComponentActivity() {
             }
         }
 
-        if (dealSample.none { it.id == 1 }) {
-            dealSample.add(
-                Deal(
-                    id = 1,
-                    seller = 1,
-                    customer = 2,
-                    commodity = 21,
-                    date = "2024-11-01",
-                    comment = "ok"
-                )
-            )
-        }
-        if (dealSample.none { it.id == 2 }) {
-            dealSample.add(
-                Deal(
-                    id = 2,
-                    seller = 2,
-                    customer = 1,
-                    commodity = 25,
-                    date = "2024-11-02",
-                    comment = "okok"
-                )
-            )
-        }
+//        if (dealSample.none { it.id == 1 }) {
+//            dealSample.add(
+//                Deal(
+//                    id = 1,
+//                    seller = 1,
+//                    customer = 2,
+//                    commodity = 21,
+//                    date = "2024-11-01",
+//                    comment = "ok"
+//                )
+//            )
+//        }
+//        if (dealSample.none { it.id == 2 }) {
+//            dealSample.add(
+//                Deal(
+//                    id = 2,
+//                    seller = 2,
+//                    customer = 1,
+//                    commodity = 25,
+//                    date = "2024-11-02",
+//                    comment = "okok"
+//                )
+//            )
+//        }
 
         Column(
             modifier = Modifier
@@ -171,21 +174,13 @@ class AccountActivity : ComponentActivity() {
         }
     }
 
-
-
-
-
-
-
-
-
     @Composable
     fun HeaderSection(dealSample: List<Deal>) {
         val context = LocalContext.current
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(160.dp)
+                .height(200.dp)
                 .background(
                     Brush.verticalGradient(
                         colors = listOf(Color(0xFF2C2C2C), Color(0xFF262626)), // 渐变从稍微浅的灰到深灰
@@ -364,7 +359,7 @@ class AccountActivity : ComponentActivity() {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(360.dp)
+                    .height(480.dp)
                     .background(Color.White, RoundedCornerShape(16.dp))
             ) {
                 items(commodities) { commodity ->
@@ -386,7 +381,7 @@ class AccountActivity : ComponentActivity() {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(360.dp)
+                    .height(480.dp)
                     .background(Color.White, RoundedCornerShape(16.dp))
             ) {
                 items(orders) { order ->
@@ -397,6 +392,7 @@ class AccountActivity : ComponentActivity() {
     }
 
 
+    @SuppressLint("CoroutineCreationDuringComposition")
     @Composable
     fun DealCard(deal: Deal) {
         val coroutineScope = rememberCoroutineScope()

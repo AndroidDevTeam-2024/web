@@ -70,7 +70,7 @@ interface AuthService {
     @PUT("/user/update_by_id/{id}")
     suspend fun editprofile(@Path("id") id: Int, @Body request: NetworkManager.EditProfileRequest): Response<Void>
 
-    @POST("commodity/update_by_id/{id}")
+    @PUT("commodity/update_by_id/{id}")
     suspend fun editcommodity(@Path("id") id: Int, @Body request: NetworkManager.EditCommodityRequest): Response<Void>
 
     @DELETE("commodity/delete_by_id/{id}")

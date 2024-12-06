@@ -1,7 +1,10 @@
 package com.example.atry
 
+import android.annotation.SuppressLint
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
@@ -31,6 +34,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.platform.LocalContext
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -50,6 +54,7 @@ class DealDetailActivity: ComponentActivity() {
 
     //data class Deal(val id: Int, val seller: Int, val customer: Int, val commodity: Int, var date: String, var comment: String) : Serializable
 
+    @SuppressLint("CoroutineCreationDuringComposition")
     @RequiresApi(Build.VERSION_CODES.O)
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
@@ -229,6 +234,7 @@ class DealDetailActivity: ComponentActivity() {
                 )
 
 
+                val context = LocalContext.current
                 // Button to send the comment
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
@@ -249,6 +255,8 @@ class DealDetailActivity: ComponentActivity() {
                                 if (response.isSuccessful) {
                                     // Handle successful response
                                     println("Comment sent successfully")
+                                    Toast.makeText(context, "评论成功", Toast.LENGTH_SHORT).show()
+                                    deal.comment = commentInput
                                 } else {
                                     println("Failed to send comment")
                                 }

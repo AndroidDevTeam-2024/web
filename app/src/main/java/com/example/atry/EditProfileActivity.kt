@@ -183,7 +183,7 @@ class EditProfileActivity : ComponentActivity() {
                                     // 使用后台线程执行耗时操作
                                     val response = withContext(Dispatchers.IO) {
                                         if (bitmap != null) {
-                                            uploadAvatarWithUserId(UserSession.getInstance().id.toString(), bitmap, "image")
+                                            uploadAvatarWithUserId(UserSession.getInstance().id.toString(), bitmap, "imageuser" + UserSession.getInstance().id)
                                         }
                                     }
 
