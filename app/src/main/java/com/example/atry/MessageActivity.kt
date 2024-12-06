@@ -3,6 +3,7 @@ package com.example.atry
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.util.Log
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
@@ -249,44 +251,57 @@ fun MessageItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
-            .padding(12.dp)
+    var isExpanded by remember { mutableStateOf(false) } // 创建一个能够检测卡片是否被展开的变量
+    Surface(
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier
+            .padding(all = 8.dp)
+            .clickable { // 添加一个新的 Modifier 扩展方法，可以让元素具有点击的效果
+                isExpanded = !isExpanded // 编写点击的事件内容
+            }
     ) {
-        // 头像
-        Image(
-            painter = rememberAsyncImagePainter(model = message.avator),
-            contentDescription = "Sender Avatar",
-            modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary)
-        )
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        // 消息内容部分
-        Column(
-            modifier = Modifier
+        Row(
+            modifier = modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
-                .background(MaterialTheme.colorScheme.surface)
+                .clickable { onClick() }
                 .padding(12.dp)
         ) {
-            Text(
-                text = message.senderName,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
+            // 头像
+            Image(
+                painter = rememberAsyncImagePainter(model = message.avator),
+                contentDescription = "Sender Avatar",
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
             )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = message.content,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            // 消息内容部分
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(12.dp)
+            ) {
+                Text(
+                    text = message.senderName,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = message.content,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = if (isExpanded) Int.MAX_VALUE else 1,
+                    // Composable 大小的动画效果
+                    modifier = Modifier.animateContentSize()
+                )
+            }
         }
     }
 }
