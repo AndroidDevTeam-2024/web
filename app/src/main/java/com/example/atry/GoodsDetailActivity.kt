@@ -210,7 +210,8 @@ fun ProductDetailContent(productDetail: NetworkManager.ProductDetail, email: Str
 
         Button(
             onClick = {  val intent = Intent(context, TalkActivity::class.java).apply {
-                putExtra("senderId", productDetail.business_id)
+                putExtra("senderId", productDetail.business_id.toString())
+                putExtra("commodityId", productDetail.id.toString())
             }
                 context.startActivity(intent)
                       },
