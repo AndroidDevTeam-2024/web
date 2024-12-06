@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.Animatable
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -15,7 +16,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -36,18 +36,25 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.example.atry.api.NetworkManager
+import com.example.atry.model.Product
 import com.iflytek.sparkchain.core.LLM
 import com.iflytek.sparkchain.core.LLMConfig
 import com.iflytek.sparkchain.core.LLMFactory
@@ -80,50 +87,71 @@ fun HomeScreen() {
     val coroutineScope = rememberCoroutineScope()
 
     // 主界面布局
+    // 主界面布局
     Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.BottomEnd
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(Color.Transparent, Color.Black), // 渐变背景（可以根据需要调整）
+                    startY = 0f
+                )
+            )
     ) {
-        // 右下角按钮
-        FloatingActionButton(
-            onClick = {
-                // 点击按钮控制对话框的显示或隐藏
-                if (showDialog.value) {
-                    // 隐藏对话框
-                    coroutineScope.launch {
-                        offsetY.animateTo(0f) // 动画收回对话框
-                        opacity.animateTo(0f)  // 动画淡出
-                    }
-                } else {
-                    // 显示对话框
-                    coroutineScope.launch {
-                        offsetY.animateTo(-100f) // 动画弹出对话框
-                        opacity.animateTo(1f)     // 动画淡入
-                    }
-                }
-                showDialog.value = !showDialog.value
-            },
-            containerColor = MaterialTheme.colorScheme.primary,
-            shape = CircleShape,
-            modifier = Modifier
-                .padding(16.dp)
-                .size(56.dp)
+        // 背景图片
+        Image(
+            painter = painterResource(id = R.drawable.home_img),
+            contentDescription = "Background Image",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop // 使图片铺满整个背景
+        )
+
+        // 主内容
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.BottomEnd
         ) {
-            Icon(
-                imageVector = Icons.Default.Chat,
-                contentDescription = "Chat Button",
-                tint = Color.White
+            // 右下角按钮
+            FloatingActionButton(
+                onClick = {
+                    // 点击按钮控制对话框的显示或隐藏
+                    if (showDialog.value) {
+                        // 隐藏对话框
+                        coroutineScope.launch {
+                            offsetY.animateTo(0f) // 动画收回对话框
+                            opacity.animateTo(0f) // 动画淡出
+                        }
+                    } else {
+                        // 显示对话框
+                        coroutineScope.launch {
+                            offsetY.animateTo(-100f) // 动画弹出对话框
+                            opacity.animateTo(1f) // 动画淡入
+                        }
+                    }
+                    showDialog.value = !showDialog.value
+                },
+                containerColor = MaterialTheme.colorScheme.primary,
+                shape = CircleShape,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .size(56.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Chat,
+                    contentDescription = "Chat Button",
+                    tint = Color.White
+                )
+            }
+        }
+
+        // 弹出聊天对话框
+        if (showDialog.value) {
+            ChatDialog(
+                offsetY = offsetY.value,
+                opacity = opacity.value,
+                onDismiss = { showDialog.value = false }
             )
         }
-    }
-
-    // 弹出聊天对话框
-    if (showDialog.value) {
-        ChatDialog(
-            offsetY = offsetY.value,
-            opacity = opacity.value,
-            onDismiss = { showDialog.value = false }
-        )
     }
 }
 
@@ -133,6 +161,11 @@ fun ChatDialog(onDismiss: () -> Unit, offsetY: Float, opacity: Float) {
     // 聊天记录
     val chatMessages = remember { mutableStateListOf<Pair<String, Boolean>>() } // Pair(消息内容, 是否为用户)
     val userInput = remember { mutableStateOf("") }
+    val GoodsList = remember { mutableStateOf(emptyList<Product>()) }
+
+    LaunchedEffect(Unit) {
+        loadAllProducts(GoodsList)
+    }
 
     Dialog(
         onDismissRequest = { onDismiss() }
@@ -214,7 +247,7 @@ fun ChatDialog(onDismiss: () -> Unit, offsetY: Float, opacity: Float) {
 
                                 // 模拟回复
                                 CoroutineScope(Dispatchers.IO).launch {
-                                    val response = mockModelResponse(userMessage)
+                                    val response = mockModelResponse(userMessage,GoodsList)
                                     withContext(Dispatchers.Main) {
                                         chatMessages.add(Pair(response, false)) // 添加模型消息
                                     }
@@ -229,6 +262,20 @@ fun ChatDialog(onDismiss: () -> Unit, offsetY: Float, opacity: Float) {
                 }
             }
         }
+    }
+}
+
+private suspend fun loadAllProducts(
+    filteredList: MutableState<List<Product>> ) {
+    val apiService = NetworkManager.apiService
+    try {
+        val response = apiService.allGoods()
+        if (response.isSuccessful) {
+            val products = response.body()?.commodities?.toList() ?: emptyList()
+            filteredList.value = products
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
     }
 }
 
@@ -260,20 +307,24 @@ fun ChatBubble(message: Pair<String, Boolean>) {
     }
 }
 
-suspend fun mockModelResponse(question: String): String {
-//    Log.i("SparkChain", question)
-//    val window_memory: Memory = Memory.windowMemory(5)
-//    val chat_llmConfig: LLMConfig = LLMConfig.builder().maxToken(2048)
-//    Log.i("SparkChain", "hello")
-//    val chat_llm: LLM = LLMFactory.textGeneration(chat_llmConfig, window_memory);
-//    val syncOutput: LLMOutput = chat_llm.run(question)
-//    val content = syncOutput.content
-//    Log.i("SparkChain", content)
-//    val errCode = syncOutput.errCode
-//    Log.i("SparkChain", errCode.toString())
-//    val errMsg = syncOutput.errMsg
-//    Log.i("SparkChain", errMsg.toString())
-//    return content.toString()
-    return "okok"
+suspend fun mockModelResponse(question: String, GoodsList: MutableState<List<Product>>): String {
+    // 遍历 GoodsList，将每个 Product 的属性拼接为字符串
+    val goodsDetails = GoodsList.value.mapIndexed { index, product ->
+        "${index + 1}. 名称：${product.name}，描述：${product.introduction}，价格：${product.price}"
+    }.joinToString(separator = "\n") // 用换行符分隔每个商品信息
+    // 拼接最终结果字符串
+    val result = "商品列表：\n$goodsDetails\n\n问题：$question"
+    Log.i("SparkChain", result)
+    val window_memory: Memory = Memory.windowMemory(5)
+    val chat_llmConfig: LLMConfig = LLMConfig.builder().maxToken(2048)
+    val chat_llm: LLM = LLMFactory.textGeneration(chat_llmConfig, window_memory);
+    val syncOutput: LLMOutput = chat_llm.run(result)
+    val content = syncOutput.content
+    Log.i("SparkChain", content)
+    val errCode = syncOutput.errCode
+    Log.i("SparkChain", errCode.toString())
+    val errMsg = syncOutput.errMsg
+    Log.i("SparkChain", errMsg.toString())
+    return content.toString()
 }
 
