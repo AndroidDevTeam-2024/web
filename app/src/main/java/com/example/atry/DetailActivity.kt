@@ -12,7 +12,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -103,21 +105,28 @@ class DetailActivity : ComponentActivity() {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(120.dp) // 设置固定高度
                     .padding(bottom = 24.dp)
                     .clip(RoundedCornerShape(8.dp)) // 圆角
                     .background(Color(0xFFF5F5F5)) // 更柔和的背景色
                     .border(0.5.dp, Color.LightGray, RoundedCornerShape(8.dp)) // 边框更细
             ) {
+                // 使用 ScrollState 实现滚动
+                val scrollState = rememberScrollState()
+
+                // 使用 Modifier.verticalScroll 使 Text 可滚动
                 Text(
                     text = commodity.introduction,
                     fontSize = 14.sp,
                     color = Color.Gray,
                     modifier = Modifier
-                        .padding(16.dp), // 内部 padding
-                    maxLines = 3,
-                    overflow = TextOverflow.Ellipsis
+                        .padding(16.dp) // 内部 padding
+                        .verticalScroll(scrollState), // 添加滚动效果
+                    maxLines = Int.MAX_VALUE, // 取消最大行数限制
+                    overflow = TextOverflow.Visible // 显示完整内容，不裁剪
                 )
             }
+
 
             // Spacer to push buttons to the bottom
             Spacer(modifier = Modifier.weight(1f))

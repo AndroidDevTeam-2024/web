@@ -74,7 +74,7 @@ class EditProfileActivity : ComponentActivity() {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = "Edit Profile",
+                text = "编辑个人信息",
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.Black,
@@ -97,7 +97,7 @@ class EditProfileActivity : ComponentActivity() {
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Password") },
+                label = { Text("密码") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
@@ -109,7 +109,7 @@ class EditProfileActivity : ComponentActivity() {
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email") },
+                label = { Text("邮箱") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)
@@ -138,7 +138,7 @@ class EditProfileActivity : ComponentActivity() {
                     }
                 } else {
                     Text(
-                        text = "click here to change avator if necessary",
+                        text = "点击此处更换头像",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -199,7 +199,7 @@ class EditProfileActivity : ComponentActivity() {
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text("Save")
+                Text("保存")
             }
 
             // Save Button
@@ -208,7 +208,7 @@ class EditProfileActivity : ComponentActivity() {
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text("Back")
+                Text("返回")
             }
         }
     }

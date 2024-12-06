@@ -62,8 +62,7 @@ fun MessagesScreen() {
     var messages by remember {
         mutableStateOf(
             listOf(
-                AvaMessage(1, 100, "Alice", "Hey, how are you?", "123"),
-                AvaMessage(2, 100, "Alice", "Hey, how are you?", "123")
+                AvaMessage(1, 100, "Alice", "Hey, how are you?", "123")
             )
         )
     }

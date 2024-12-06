@@ -218,8 +218,7 @@ fun confirm(business_id:Int
                 Log.e("OrderScreen", "Error create deal: ${response1.code()}")
             }
             // 创建发送消息的请求
-            val request2 = NetworkManager.SendMessRequest(buyerId, business_id, "我接受了此订单\n:商品ID{$commodityId}\n" +
-                    ":订单ID{$orderId}")
+            val request2 = NetworkManager.SendMessRequest(buyerId, business_id, "我接受了此订单")
             // 发送请求并获取响应
             val response2 = authService.sendMessage(request2)
             // 判断响应是否成功

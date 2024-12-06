@@ -453,7 +453,7 @@ fun RenderOrderMessage(
             horizontalAlignment = if (isNotSentByUser) Alignment.End else Alignment.Start
         ) {
             Text(
-                text = "你有一个订单待确认",
+                text = "我发起了一个订单",
                 modifier = Modifier
                     .background(bubbleColor, shape = RoundedCornerShape(16.dp))
                     .padding(12.dp),
