@@ -558,7 +558,7 @@ class AccountActivity : ComponentActivity() {
                     color = Color.Black
                 )
                 Text(
-                    text = "Price: $${commodity.price}",
+                    text = "价格: ¥${commodity.price}",
                     fontSize = 14.sp,
                     color = Color.Gray
                 )

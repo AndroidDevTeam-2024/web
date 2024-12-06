@@ -247,7 +247,7 @@ fun ProductCard(product: Product, onClick: () -> Unit) {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = product.price,
+                    text = "¥ ${product.price}",
                     style = MaterialTheme.typography.titleSmall.copy(fontSize = 16.sp),
                     color = MaterialTheme.colorScheme.primary
                 )
