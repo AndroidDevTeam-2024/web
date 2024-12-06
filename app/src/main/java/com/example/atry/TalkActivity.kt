@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -158,20 +159,30 @@ class TalkActivity : ComponentActivity() {
                         .fillMaxHeight(),
                     verticalArrangement = Arrangement.Bottom // 让输入框始终在底部
                 ) {
+                    // 创建一个 LazyListState 来控制滚动
+                    val listState = rememberLazyListState()
+
                     // 聊天消息列表
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f) // 让LazyColumn占据剩余空间，避免与输入框重叠
                             .padding(8.dp),
-                        reverseLayout = true // 设置列表从底部开始增长
+                        reverseLayout = false, // 设置列表从底部开始增长
+                        state = listState // 关联 ListState
                     ) {
-                        items(messages.reversed()) { message ->
+                        items(messages) { message ->
                             ChatBubble(
                                 message = message, senderId = senderId, context = context,
                                 avatar1 = avatar1, avatar2 = avatar2
                             )
                         }
+                    }
+
+                    // 每次消息列表发生变化时，自动滚动到最底部
+                    LaunchedEffect(messages.size) {
+                        // 确保在列表更新后，自动滚动到底部
+                        listState.animateScrollToItem(messages.size - 1)
                     }
 
                     // 输入框和按钮区域
@@ -227,7 +238,6 @@ class TalkActivity : ComponentActivity() {
                             Text("Send")
                         }
                     }
-
                 }
             }
         }
