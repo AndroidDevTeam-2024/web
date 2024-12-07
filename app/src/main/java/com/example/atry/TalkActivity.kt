@@ -12,6 +12,7 @@ import androidx.activity.compose.setContent
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,10 +31,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -42,11 +45,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -60,6 +65,7 @@ import com.example.atry.model.UserSession
 import kotlinx.coroutines.CoroutineScope
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope.coroutineContext
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -92,15 +98,7 @@ class TalkActivity : ComponentActivity() {
     fun ChatScreen(
         senderId: Int,
     ) {
-        var messages = remember {
-            mutableStateListOf(
-                Message(
-                    1, 100, "Alice", "Hey, how are you?\n" +
-                            "if you this message,this means no messages"
-                )
-            )
-        }
-        // 模拟一些消息数据
+        val messages = remember { mutableStateListOf<Message>() }
 
         val id1 = UserSession.getInstance().id
         val request = NetworkManager.TalkRequest(id1 = id1, id2 = senderId)
@@ -142,6 +140,7 @@ class TalkActivity : ComponentActivity() {
         }
 
         val context = LocalContext.current
+        val coroutineScope = rememberCoroutineScope()
         Column(modifier = Modifier.fillMaxSize()) {
             // 背景图片
             Box(modifier = Modifier.fillMaxSize()) {
@@ -174,7 +173,23 @@ class TalkActivity : ComponentActivity() {
                         items(messages) { message ->
                             ChatBubble(
                                 message = message, senderId = senderId, context = context,
-                                avatar1 = avatar1, avatar2 = avatar2
+                                avatar1 = avatar1, avatar2 = avatar2,
+                                onDeleteMessage = {
+                                    // 处理删除逻辑，比如从列表中移除消息
+                                    coroutineScope.launch {
+                                        try{
+                                            val response = authService.deleteMessage(message.id)
+                                            if (response.isSuccessful) {
+                                                messages.remove(message)
+                                            } else{
+                                                Log.e("TalkScreen", "Error delete message: ${response.code()}")
+                                            }
+                                        }catch (_: Exception) {
+
+                                        }
+                                    }
+
+                                }
                             )
                         }
                     }
@@ -182,7 +197,8 @@ class TalkActivity : ComponentActivity() {
                     // 每次消息列表发生变化时，自动滚动到最底部
                     LaunchedEffect(messages.size) {
                         // 确保在列表更新后，自动滚动到底部
-                        listState.animateScrollToItem(messages.size - 1)
+                        val targetIndex = maxOf(0, messages.size - 1) // 如果 messages.size - 1 小于 0，使用 0 作为索引
+                        listState.animateScrollToItem(targetIndex)
                     }
 
                     // 输入框和按钮区域
@@ -314,195 +330,231 @@ class TalkActivity : ComponentActivity() {
         }
     }
 
-@SuppressLint("SuspiciousIndentation")
-@Composable
-fun ChatBubble(
-    message: Message, senderId: Int, context: Context,
-    avatar1: String,
-    avatar2: String
-) {
-    if (isOrderMessage(message.content)) {
-        RenderOrderMessage(
-            message = message, senderId = senderId, context = context,
-            avatar1 = avatar1, avatar2 = avatar2
-        )
-    } else
-        RenderTextMessage(message, senderId, avatar1, avatar2)
-}
-
-@Composable
-fun RenderTextMessage(
-    message: Message, senderId: Int, avatar1:
-    String, avatar2: String
-) {
-    val isNotSentByUser = message.senderId != senderId
-    val bubbleColor =
-        if (isNotSentByUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
-    val textColor = if (isNotSentByUser) Color.White else Color.Black
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp, horizontal = 8.dp),
-        horizontalArrangement = if (isNotSentByUser) Arrangement.End else Arrangement.Start
+    @SuppressLint("SuspiciousIndentation")
+    @Composable
+    fun ChatBubble(
+        message: Message, senderId: Int, context: Context,
+        avatar1: String,
+        avatar2: String,
+        onDeleteMessage: (Message) -> Unit // 提供一个回调来删除消息
     ) {
-        if (!isNotSentByUser) {
-            // 左侧显示头像和名字
-            Column(
-                modifier = Modifier.padding(end = 8.dp),
-                horizontalAlignment = Alignment.Start
-            ) {
-                Image(
-                    painter = rememberAsyncImagePainter(avatar1),
-                    contentDescription = "User Avatar",
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surface),
-                    contentScale = ContentScale.Crop
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = message.senderName,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-        }
-
-        // 显示聊天气泡
-        Column(
-            horizontalAlignment = if (isNotSentByUser) Alignment.End else Alignment.Start
-        ) {
-            Text(
-                text = message.content,
-                modifier = Modifier
-                    .background(bubbleColor, shape = RoundedCornerShape(16.dp))
-                    .padding(12.dp),
-                color = textColor
+        var showDialog by remember { mutableStateOf(false) }
+        var messageToDelete by remember { mutableStateOf<Message?>(null) }
+        if (showDialog && messageToDelete != null) {
+            AlertDialog(
+                onDismissRequest = { showDialog = false },
+                title = { Text("删除消息") },
+                text = { Text("确定要删除此消息吗？") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        messageToDelete?.let { onDeleteMessage(it) } // 调用删除消息的回调
+                        showDialog = false
+                    }) {
+                        Text("删除")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDialog = false }) {
+                        Text("取消")
+                    }
+                }
             )
         }
+        if (isOrderMessage(message.content)) {
+            RenderOrderMessage(
+                message = message, senderId = senderId, context = context,
+                avatar1 = avatar1, avatar2 = avatar2
+            )
+        } else
+            RenderTextMessage(message, senderId, avatar1, avatar2, onLongPress = {
+                messageToDelete = message
+                showDialog = true
+            })
+    }
 
-        if (isNotSentByUser) {
-            // 右侧显示头像和名字
-            Column(
-                modifier = Modifier.padding(start = 8.dp),
-                horizontalAlignment = Alignment.End
+    @Composable
+    fun RenderTextMessage(
+        message: Message, senderId: Int, avatar1:
+        String, avatar2: String,
+        onLongPress: () -> Unit // 新增的长按事件回调
+    ) {
+        val isNotSentByUser = message.senderId != senderId
+        val bubbleColor =
+            if (isNotSentByUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
+        val textColor = if (isNotSentByUser) Color.White else Color.Black
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp, horizontal = 8.dp).pointerInput(Unit) {
+                    detectTapGestures(
+                        onLongPress = {
+                            if (isNotSentByUser) {
+                                onLongPress()  // 触发长按事件
+                            }
+                        }
+                    )
+                },
+            horizontalArrangement = if (isNotSentByUser) Arrangement.End else Arrangement.Start,
+
             ) {
-                Image(
-                    painter = rememberAsyncImagePainter(avatar2),
-                    contentDescription = "User Avatar",
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surface),
-                    contentScale = ContentScale.Crop
-                )
-                Spacer(modifier = Modifier.height(4.dp))
+            if (!isNotSentByUser) {
+                // 左侧显示头像和名字
+                Column(
+                    modifier = Modifier.padding(end = 8.dp),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    Image(
+                        painter = rememberAsyncImagePainter(avatar1),
+                        contentDescription = "User Avatar",
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surface),
+                        contentScale = ContentScale.Crop
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = message.senderName,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+
+            // 显示聊天气泡
+            Column(
+                horizontalAlignment = if (isNotSentByUser) Alignment.End else Alignment.Start
+            ) {
                 Text(
-                    text = message.senderName,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface
+                    text = message.content,
+                    modifier = Modifier
+                        .background(bubbleColor, shape = RoundedCornerShape(16.dp))
+                        .padding(12.dp),
+                    color = textColor
                 )
+            }
+
+            if (isNotSentByUser) {
+                // 右侧显示头像和名字
+                Column(
+                    modifier = Modifier.padding(start = 8.dp),
+                    horizontalAlignment = Alignment.End
+                ) {
+                    Image(
+                        painter = rememberAsyncImagePainter(avatar2),
+                        contentDescription = "User Avatar",
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surface),
+                        contentScale = ContentScale.Crop
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = message.senderName,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
             }
         }
     }
-}
 
-@Composable
-fun RenderOrderMessage(
-    message: Message, senderId: Int, context: Context, avatar1: String,
-    avatar2: String
-) {
-    val isNotSentByUser = message.senderId != senderId
-    val bubbleColor = if (isNotSentByUser) MaterialTheme.colorScheme.primary else Color(0xFFFFE082)
-    val textColor = if (isNotSentByUser) Color.White else MaterialTheme.colorScheme.onSurface
-    val commodity = fetchComId(message.content)
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp, horizontal = 8.dp),
-        horizontalArrangement = if (isNotSentByUser) Arrangement.End else Arrangement.Start
+    @Composable
+    fun RenderOrderMessage(
+        message: Message, senderId: Int, context: Context, avatar1: String,
+        avatar2: String
     ) {
-        if (!isNotSentByUser) {
+        val isNotSentByUser = message.senderId != senderId
+        val bubbleColor = if (isNotSentByUser) MaterialTheme.colorScheme.primary else Color(0xFFFFE082)
+        val textColor = if (isNotSentByUser) Color.White else MaterialTheme.colorScheme.onSurface
+        val commodity = fetchComId(message.content)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp, horizontal = 8.dp),
+            horizontalArrangement = if (isNotSentByUser) Arrangement.End else Arrangement.Start
+        ) {
+            if (!isNotSentByUser) {
+
+                Column(
+                    modifier = Modifier.padding(end = 8.dp),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    Image(
+                        painter = rememberAsyncImagePainter(avatar1),
+                        contentDescription = "User Avatar",
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surface),
+                        contentScale = ContentScale.Crop
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = message.senderName,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+
 
             Column(
-                modifier = Modifier.padding(end = 8.dp),
-                horizontalAlignment = Alignment.Start
+                horizontalAlignment = if (isNotSentByUser) Alignment.End else Alignment.Start
             ) {
-                Image(
-                    painter = rememberAsyncImagePainter(avatar1),
-                    contentDescription = "User Avatar",
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surface),
-                    contentScale = ContentScale.Crop
-                )
-                Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = message.senderName,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface
+                    text = "我发起了一个订单",
+                    modifier = Modifier
+                        .background(bubbleColor, shape = RoundedCornerShape(16.dp))
+                        .padding(12.dp),
+                    color = textColor
                 )
+                Spacer(modifier = Modifier.height(8.dp)) // 用于文本和按钮之间的间距
+
+                if(!isNotSentByUser) {
+                    Button(
+                        onClick = {
+                            val intent = Intent(context, OrderActivity::class.java).apply {
+                                putExtra("commodity", commodity.toString())
+                                putExtra("buyId", senderId.toString())
+                            }
+                            context.startActivity(intent)
+                        },
+                        modifier = Modifier.padding(8.dp) // 设置按钮的外边距
+                    ) {
+                        Text(text = "查看订单")
+                    }
+                }
             }
-        }
 
-
-        Column(
-            horizontalAlignment = if (isNotSentByUser) Alignment.End else Alignment.Start
-        ) {
-            Text(
-                text = "我发起了一个订单",
-                modifier = Modifier
-                    .background(bubbleColor, shape = RoundedCornerShape(16.dp))
-                    .padding(12.dp),
-                color = textColor
-            )
-            Spacer(modifier = Modifier.height(8.dp)) // 用于文本和按钮之间的间距
-
-            if(!isNotSentByUser) {
-                Button(
-                    onClick = {
-                        val intent = Intent(context, OrderActivity::class.java).apply {
-                            putExtra("commodity", commodity.toString())
-                            putExtra("buyId", senderId.toString())
-                        }
-                        context.startActivity(intent)
-                    },
-                    modifier = Modifier.padding(8.dp) // 设置按钮的外边距
+            if (isNotSentByUser) {
+                // 右侧显示头像和名字
+                Column(
+                    modifier = Modifier.padding(start = 8.dp),
+                    horizontalAlignment = Alignment.End
                 ) {
-                    Text(text = "查看订单")
+                    Image(
+                        painter = rememberAsyncImagePainter(avatar2),
+                        contentDescription = "User Avatar",
+                        modifier = Modifier
+                            .size(32.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surface),
+                        contentScale = ContentScale.Crop
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = message.senderName,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
                 }
             }
         }
 
-        if (isNotSentByUser) {
-            // 右侧显示头像和名字
-            Column(
-                modifier = Modifier.padding(start = 8.dp),
-                horizontalAlignment = Alignment.End
-            ) {
-                Image(
-                    painter = rememberAsyncImagePainter(avatar2),
-                    contentDescription = "User Avatar",
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.surface),
-                    contentScale = ContentScale.Crop
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = message.senderName,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-        }
     }
-
-}
 
 
 }
@@ -511,7 +563,7 @@ fun RenderOrderMessage(
 fun isOrderMessage(content: String): Boolean {
     // 检查字符串的前两个字符
     return content.startsWith("\u00FF\u00FF")&& content.endsWith("==\n")
-            // 0xFF 是十六进制的 255
+    // 0xFF 是十六进制的 255
 }
 
 //必须在校验后获取
@@ -573,8 +625,3 @@ fun generateOrderMess(id: Int): String {
     val init = "order_$id"
     return "\u00ff\u00ff" + encrypt(init, UserSession.encryptionKey)
 }
-
-
-
-
-

@@ -1,6 +1,7 @@
 package com.example.atry
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.util.Log
 import androidx.compose.animation.animateContentSize
@@ -154,109 +155,18 @@ fun SwipeToDismissMessage(
     val messageList = remember { mutableStateListOf(*messages.toTypedArray()) }
     LazyColumn {
         items(messageList, key = { it.id }) { message -> // 确保唯一键
-            val swipeState = rememberSwipeToDismissBoxState()
 
-            SwipeToDismissBox(
-                state = swipeState,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp), // 避免动态测量问题
-                enableDismissFromStartToEnd = false,
-                enableDismissFromEndToStart = true,
-                backgroundContent = {
-                    when (swipeState.targetValue) {
-                        SwipeToDismissBoxValue.Settled -> {
-                            Box(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(115.dp)
-                                    .background(Color.White)
-                            )
-                        }
 
-                        SwipeToDismissBoxValue.StartToEnd -> {
-                            Box(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(115.dp)
-                                    .background(Color.Green)
-                            )
-                        }
-
-                        SwipeToDismissBoxValue.EndToStart -> {
-                            Box(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(115.dp)
-                                    .background(Color.White) // 保持其他区域背景为白色
-                            ) {
-                                // 仅让垃圾桶附近区域变灰
-                                Box(
-                                    Modifier
-                                        .fillMaxHeight()
-                                        .width(65.dp) // 控制灰色区域的宽度
-                                        .background(Color.LightGray)
-                                        .align(Alignment.CenterEnd) // 对齐到右侧
-                                ) {
-                                    // 将图标居中对齐
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.ic_delete),
-                                        contentDescription = "Delete",
-                                        modifier = Modifier
-                                            .size(48.dp)
-                                            .align(Alignment.Center), // 让图标在灰色区域中居中
-                                        tint = Color.Black
-                                    )
-                                }
-                            }
-                        }
-
-                        else -> {
-                            Box(
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(115.dp)
-                                    .background(Color.White)
-                            )
-                        }
-                    }
-                },
-
-                content = {
-
-                    MessageItem(
-                        message = message,
-                        onClick = {
-                            val intent = Intent(context, TalkActivity::class.java)
-                            intent.putExtra("senderId", message.senderId.toString())
-                            context.startActivity(intent)
-                        }
-                    )
-
-                }
-
+            MessageItem(
+                message = message,
+                onClick = {
+                    val intent = Intent(context, TalkActivity::class.java)
+                    intent.putExtra("senderId", message.senderId.toString())
+                    context.startActivity(intent) }
             )
-
-            LaunchedEffect(swipeState.currentValue) {
-                if (swipeState.currentValue == SwipeToDismissBoxValue.EndToStart) {
-                    val id1 = UserSession.getInstance().id
-                    val id2 = message.senderId
-                    val request = NetworkManager.TalkRequest(id1 = id1, id2 = id2)
-                    try {
-                        val response = authService.deleteTalk(request)
-                        if (response.isSuccessful) {
-                            delay(100) // 延迟以确保动画完成
-                            messageList.remove(message) // 安全地更新数据源
-                        } else {
-                            Log.e("MessageScreen", "Error delete talk: ${response.code()}")
-                        }
-                    } catch (e: Exception) {
-                        Log.e("MessageScreen", "Exception: ${e.message}")
-                    }
-
-                }
-            }
         }
+
+
     }
 }
 

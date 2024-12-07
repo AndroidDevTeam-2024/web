@@ -189,7 +189,7 @@ fun ChatDialog(onDismiss: () -> Unit, offsetY: Float, opacity: Float) {
             ) {
                 // 对话框标题
                 Text(
-                    text = "与大模型对话",
+                    text = "与智能助手对话",
                     style = MaterialTheme.typography.titleLarge.copy(fontSize = 16.sp), // 减小字体
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier

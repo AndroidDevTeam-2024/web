@@ -86,7 +86,7 @@ class EditProfileActivity : ComponentActivity() {
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
-                label = { Text("账号") },
+                label = { Text("用户名") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp)

@@ -87,18 +87,14 @@ fun GoodsScreen() {
                     containerColor = Color.White
                 )
             )
-
             Spacer(modifier = Modifier.width(8.dp))
-
             // 类别下拉菜单
             CategoryDropdownMenu(
                 selectedCategory = selectedCategory.value,
                 onCategorySelected = { selectedCategory.value = it },
                 options = categoryOptions
             )
-
             Spacer(modifier = Modifier.width(8.dp))
-
             // 搜索按钮
             Button(
                 onClick = {
@@ -180,7 +176,6 @@ private fun searchProductsByCategory(
     onResult: (List<Product>) -> Unit
 ) {
     val apiService = NetworkManager.apiService
-
     // 在异步任务中调用 API
     CoroutineScope(Dispatchers.IO).launch {
         try {

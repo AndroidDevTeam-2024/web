@@ -60,7 +60,7 @@ class LoginActivity: ComponentActivity() {
             TextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("账号") },
+                label = { Text("用户名") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))

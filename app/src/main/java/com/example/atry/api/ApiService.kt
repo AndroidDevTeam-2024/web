@@ -16,12 +16,6 @@ import retrofit2.http.Part
 import retrofit2.http.Path
 
 interface ApiService {
-
-
-    // 你可以根据需求继续添加其他接口，例如获取所有用户、创建用户等
-    //@POST("users")
-    //fun createUser(@Body user: User): Call<User>
-
     // 获取所有商品
     @GET("commodity/find_all")
     suspend fun allGoods(): Response<NetworkManager.AllGoodsResponse>
@@ -37,16 +31,20 @@ interface ApiService {
 interface AuthService {
     @POST("user/login") // 登录接口的路径，具体根据你的后端 API 修改
     suspend fun login(@Body request: NetworkManager.LoginRequest): Response<NetworkManager.LoginResponse>
+
     @POST("user/register")
     suspend fun signup(@Body request: NetworkManager.SignupRequest): Response<NetworkManager.SignupResponse>
+
     @GET("user/avatar/{userId}")
     suspend fun getAvatar(@Path("userId") userId: Int): Response<ResponseBody>
+
     @Multipart
     @POST("user/upload_avator")
     suspend fun uploadAvatar(
         @Part("id") id: RequestBody,
         @Part avator: MultipartBody.Part
     ): Response<Void>
+
     @POST("message/send")
     suspend fun sendMessage(@Body request: NetworkManager.SendMessRequest):Response<NetworkManager.messageResponse>
 
@@ -59,7 +57,6 @@ interface AuthService {
         @Part("id") id: RequestBody,
         @Part homepage: MultipartBody.Part
     ): Response<Void>
-
 
     @GET("commodity/find_by_publisher/{id}")
     suspend fun loadmycommodity(@Path("id") id: Int): Response<NetworkManager.LoadmycommodityResponse>
@@ -75,7 +72,6 @@ interface AuthService {
 
     @DELETE("commodity/delete_by_id/{id}")
     suspend fun deletemycommodity(@Path("id") id: Int): Response<Void>
-
 
     @GET("/commodity/find_by_id/{id}")
     suspend fun getcommodity(@Path("id") id: Int): Response<NetworkManager.GetCommodityResponse>
@@ -100,7 +96,10 @@ interface AuthService {
 
     @GET("user/get_avator/{userId}")
     suspend fun getAvatarTalk(@Path("userId") userId: Int): Response<NetworkManager.avatarResponse>
+
     @POST("/deal/post")
     suspend fun createDeal(@Body request: NetworkManager.dealRequest): Response<NetworkManager.dealResponse>
 
+    @DELETE("/message/delete_by_id/{id}")
+    suspend fun deleteMessage(@Path("id") id : Int) : Response<ResponseBody>
 }
