@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.compose.rememberImagePainter
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.example.atry.api.NetworkManager
 import com.example.atry.model.UserSession
@@ -276,17 +277,20 @@ class AccountActivity : ComponentActivity() {
                 .clip(CircleShape)
                 .background(Color.White)
         ) {
-            // 使用 rememberImagePainter 来加载网络图片
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(avatarUrl)  // 网络图片 URL
+                    .memoryCachePolicy(CachePolicy.DISABLED) // 禁用内存缓存
+                    .diskCachePolicy(CachePolicy.DISABLED) // 禁用磁盘缓存
                     .build(),
                 contentDescription = "Profile Picture",
                 modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop // 让图片裁剪为圆形
+                contentScale = ContentScale.Crop,
             )
         }
     }
+
+
 
     @Composable
     fun StatItem(label: String, value: String) {

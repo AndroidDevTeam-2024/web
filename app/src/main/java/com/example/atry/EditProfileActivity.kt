@@ -171,6 +171,8 @@ class EditProfileActivity : ComponentActivity() {
                                     } else {
                                         println("success")
                                     }
+                                    UserSession.getInstance().username = username;
+                                    UserSession.getInstance().email = email;
                                 } else {
                                     println("failed")
                                 }
@@ -228,7 +230,4 @@ class EditProfileActivity : ComponentActivity() {
             null
         }
     }
-
-
-
 }
