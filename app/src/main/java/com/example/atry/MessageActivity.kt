@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -96,7 +97,7 @@ fun MessagesScreen() {
 
     // 如果正在加载，显示加载指示器
     if (isLoading) {
-          // 或者其他加载中的 UI
+        // 或者其他加载中的 UI
     } else {
         // 根据消息列表是否为空决定显示的内容
         if (messages.isEmpty()) {
@@ -109,7 +110,7 @@ fun MessagesScreen() {
 
 @Composable
 fun DisplayNoMessage() {
-     // 可选：清空消息列表
+    // 可选：清空消息列表
 
     // 显示提示信息和图片
     Column(
@@ -164,61 +165,76 @@ fun SwipeToDismissMessage(
                 enableDismissFromEndToStart = true,
                 backgroundContent = {
                     when (swipeState.targetValue) {
-                        SwipeToDismissBoxValue.Settled -> { // 未滑动时
+                        SwipeToDismissBoxValue.Settled -> {
                             Box(
                                 Modifier
                                     .fillMaxWidth()
-                                    .height(80.dp)
+                                    .height(115.dp)
                                     .background(Color.White)
                             )
                         }
-                        SwipeToDismissBoxValue.StartToEnd -> { // 左滑时（假设不启用该方向）
+
+                        SwipeToDismissBoxValue.StartToEnd -> {
                             Box(
                                 Modifier
                                     .fillMaxWidth()
-                                    .height(80.dp)
-                                    .background(Color.Green) // 可以改为其他内容
+                                    .height(115.dp)
+                                    .background(Color.Green)
                             )
                         }
-                        SwipeToDismissBoxValue.EndToStart -> { // 右滑时
+
+                        SwipeToDismissBoxValue.EndToStart -> {
                             Box(
                                 Modifier
                                     .fillMaxWidth()
-                                    .height(80.dp)
-                                    .background(Color.LightGray),
-                                contentAlignment = Alignment.CenterEnd // 将内容对齐到右侧
+                                    .height(115.dp)
+                                    .background(Color.White) // 保持其他区域背景为白色
                             ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_delete), // 替换为你的垃圾桶图标资源
-                                    contentDescription = "Delete",
-                                    modifier = Modifier
-                                        .size(48.dp)
-                                        .padding(end = 16.dp),
-                                    tint = Color.Black// 图标颜色，可调整
-                                )
+                                // 仅让垃圾桶附近区域变灰
+                                Box(
+                                    Modifier
+                                        .fillMaxHeight()
+                                        .width(65.dp) // 控制灰色区域的宽度
+                                        .background(Color.LightGray)
+                                        .align(Alignment.CenterEnd) // 对齐到右侧
+                                ) {
+                                    // 将图标居中对齐
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_delete),
+                                        contentDescription = "Delete",
+                                        modifier = Modifier
+                                            .size(48.dp)
+                                            .align(Alignment.Center), // 让图标在灰色区域中居中
+                                        tint = Color.Black
+                                    )
+                                }
                             }
                         }
+
                         else -> {
                             Box(
                                 Modifier
                                     .fillMaxWidth()
-                                    .height(60.dp)
+                                    .height(115.dp)
                                     .background(Color.White)
                             )
                         }
                     }
-
                 },
+
                 content = {
+
                     MessageItem(
                         message = message,
                         onClick = {
                             val intent = Intent(context, TalkActivity::class.java)
-                            intent.putExtra("senderId", message.senderId.toString()) // 可选：传递 message 数据
+                            intent.putExtra("senderId", message.senderId.toString())
                             context.startActivity(intent)
                         }
                     )
+
                 }
+
             )
 
             LaunchedEffect(swipeState.currentValue) {
@@ -252,12 +268,13 @@ fun MessageItem(
 ) {
     var isExpanded by remember { mutableStateOf(false) } // 创建一个能够检测卡片是否被展开的变量
     Surface(
-        shape = MaterialTheme.shapes.medium,
+
         modifier = Modifier
             .padding(all = 8.dp)
             .clickable { // 添加一个新的 Modifier 扩展方法，可以让元素具有点击的效果
                 isExpanded = !isExpanded // 编写点击的事件内容
             }
+            .fillMaxHeight()
     ) {
         Row(
             modifier = modifier
@@ -301,7 +318,7 @@ fun MessageItem(
                         // Composable 大小的动画效果
                         modifier = Modifier.animateContentSize()
                     )
-                } else{
+                } else {
                     Text(
                         text = message.content,
                         style = MaterialTheme.typography.bodyMedium,
