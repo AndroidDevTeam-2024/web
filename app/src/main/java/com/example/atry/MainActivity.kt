@@ -63,11 +63,11 @@ class MainActivity : ComponentActivity() {
         }*/
 
         //配置应用信息
-        val config = SparkChainConfig.builder()
+        /*val config = SparkChainConfig.builder()
             .appID("88f03161")
             .apiKey("abb03df7d1a452516ac868f034252981")
             .apiSecret("Mzc1ZGRiNTFiNzRiNGI3Yzk4ZmJmNjUx")
-        val ret = SparkChain.getInst().init(applicationContext,config)
+        val ret = SparkChain.getInst().init(applicationContext,config)*/
 
         setContent {
             MainScreen()

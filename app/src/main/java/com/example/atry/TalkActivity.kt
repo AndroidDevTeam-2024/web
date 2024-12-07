@@ -510,7 +510,8 @@ fun RenderOrderMessage(
 
 fun isOrderMessage(content: String): Boolean {
     // 检查字符串的前两个字符
-    return content.startsWith("\u00FF\u00FF") // 0xFF 是十六进制的 255
+    return content.startsWith("\u00FF\u00FF")&& content.endsWith("==\n")
+            // 0xFF 是十六进制的 255
 }
 
 //必须在校验后获取

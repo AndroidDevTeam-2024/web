@@ -292,14 +292,25 @@ fun MessageItem(
                     color = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = message.content,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = if (isExpanded) Int.MAX_VALUE else 1,
-                    // Composable 大小的动画效果
-                    modifier = Modifier.animateContentSize()
-                )
+                if (isOrderMessage(message.content)) {
+                    Text(
+                        text = "我发起了一个订单",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = if (isExpanded) Int.MAX_VALUE else 1,
+                        // Composable 大小的动画效果
+                        modifier = Modifier.animateContentSize()
+                    )
+                } else{
+                    Text(
+                        text = message.content,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = if (isExpanded) Int.MAX_VALUE else 1,
+                        // Composable 大小的动画效果
+                        modifier = Modifier.animateContentSize()
+                    )
+                }
             }
         }
     }
