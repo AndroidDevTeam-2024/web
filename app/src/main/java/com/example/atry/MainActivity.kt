@@ -63,11 +63,11 @@ class MainActivity : ComponentActivity() {
         }*/
 
         //配置应用信息
-        /*val config = SparkChainConfig.builder()
+        val config = SparkChainConfig.builder()
             .appID("88f03161")
             .apiKey("abb03df7d1a452516ac868f034252981")
             .apiSecret("Mzc1ZGRiNTFiNzRiNGI3Yzk4ZmJmNjUx")
-        val ret = SparkChain.getInst().init(applicationContext,config)*/
+        val ret = SparkChain.getInst().init(applicationContext,config)
 
         setContent {
             MainScreen()
@@ -107,7 +107,7 @@ fun TurnToRegisterScreen() {
 fun BottomNavigationBar(navController: NavHostController) {
     val items = listOf(
         NavigationItem("home", "主页", Icons.Filled.Home),
-        NavigationItem("products", "产品", Icons.Filled.ShoppingCart),
+        NavigationItem("products", "商品", Icons.Filled.ShoppingCart),
         NavigationItem("publish", "发布", Icons.Filled.Add), // 添加“发布”按钮
         NavigationItem("messages", "消息", Icons.AutoMirrored.Filled.Message),
         NavigationItem("profile", "我的", Icons.Filled.Person)
@@ -132,9 +132,6 @@ fun BottomNavigationBar(navController: NavHostController) {
 }
 
 data class NavigationItem(val route: String, val label: String, val icon: ImageVector)
-
-
-
 
 
 
